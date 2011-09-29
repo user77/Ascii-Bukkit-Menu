@@ -26,6 +26,7 @@ INSTALL:
 	OR
 	$ git clone git@github.com:user77/Ascii-Bukkit-Menu.git
 RUN:
+	If you are running this via PuTTY or any other ssh client. It is recommended you run your window size at minimum: 120 Columns 45 Rows.
 	$ cd /path_of_your_choice
 	$ ./abm
 
