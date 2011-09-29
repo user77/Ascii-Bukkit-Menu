@@ -19,7 +19,7 @@ showInfo () {
 version=`grep -m 1 "Craftbukkit version" $bukkitdir/server.log |cut -f 10-12 -d " "|cut -f6 -d "-" |cut -f1 -d " "|sed 's/[a-zA-Z]*//g'`
 MCPID=`ps -ef |grep -i craftbukkit-0.0.1-SNAPSHOT.jar |grep -v grep |awk '{ print $2 }'`
 flags=`ps -ef |grep -i craft |egrep -v "grep|tail|wget"|sed s'/^.*java/java/'`
-load=`uptime |cut -f 14-16 -d " "`
+load=`uptime|awk -F"average:" '{print $2}'` # Cut everthing after "average:"
 bukkitcpu=`ps -e -o pcpu,args|grep craftbukkit-0.0.1-SNAPSHOT|grep -v grep|sed -e 's/^[ \t]*//'|cut -f1 -d " "`
 memuse=`free -m |grep 'Mem' |awk '{print $1," | " $2," | " $3," | " $4}'`
 swapuse=`free -m |grep 'Swap' |awk '{print $1,"| " $2,"|"" "$3,"   | " $4}'`
