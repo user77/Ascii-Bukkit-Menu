@@ -22,7 +22,7 @@ load=`uptime |cut -f 14-16 -d " "`
 bukkitcpu=`ps -e -o pcpu,cpu,nice,state,cputime,args --sort pcpu | sed '/^ 0.0 /d'|grep -i craftbukkit-0.0.1-SNAPSHOT.jar|cut -d " " -f1`
 memuse=`free -m |grep 'Mem' |awk '{print $1," | " $2," | " $3," | " $4}'`
 swapuse=`free -m |grep 'Swap' |awk '{print $1,"| " $2,"|"" "$3,"   | " $4}'`
-diskuse=`df -h / |grep / |cut -d " " -f 4-12`
+diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
 plugins=`ls $bukkitdir/plugins/|grep .jar |sed 's/\(.*\)\..*/\1/'`
 cpuinfo=`cat /proc/cpuinfo|grep 'model name' |cut -f2 -d ":"|cut -f 1-6 -d " "|head -1`
 cpumhz=`cat /proc/cpuinfo|grep 'cpu MHz' |cut -f2 -d ":"|head -1`
@@ -53,9 +53,7 @@ echo -e "Memory Usage:"
 echo -e "Megabytes    Total   Used   Free "
 echo -e "     $memuse  |"
 echo -e "     $swapuse |"
-echo -e "Disk Useage:"
-echo -e "Size Used Avail Use% Mounted on"
-echo -e $diskuse
+echo -e "Disk Useage:" $diskuse
 echo -e "Load:" $load
 echo -e ""
 echo -e "Server Time:"

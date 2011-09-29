@@ -41,18 +41,20 @@ HELP:
 	
 TODO:
 	Lots. This is the first release and have much more in mind.
+	-Document Code
 	-List players logged in.
 	-Send basic commands to bukkit
 	-Add server hostname to status menu.
 
 BUGS:
-	-Fix Disk Usage and Load Avg on some systems.
+	-Fix Load Avg on some systems.
 	-Fix Bukkit CPU Usage on some systems.
 
 THANKS:
 	TnTbass for helping come up with the idea, testing, input, general geekery.
 
 Changelog:
+	-Sept 29, 2011 - Updated README, Fixed Disk Usage.
 	-Sept 28, 2011 - Updated README. Inital Upload of Ascii Bukkit Menu.	
 	-Sept 26, 2011 - Created Github Repo. Created initial README.
 
