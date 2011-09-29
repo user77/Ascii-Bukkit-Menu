@@ -47,6 +47,7 @@ TODO:
 
 BUGS:
 	-Fix Disk Usage and Load Avg on some systems.
+	-Fix Bukkit CPU Usage on some systems.
 
 THANKS:
 	TnTbass for helping come up with the idea, testing, input, general geekery.
