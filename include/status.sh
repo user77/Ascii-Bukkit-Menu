@@ -55,10 +55,10 @@ echo -e "Memory Usage:"
 echo -e "Megabytes    Total   Used   Free "
 echo -e "     $memuse  |"
 echo -e "     $swapuse |"
-echo -e "Disk Useage:" $diskuse
+echo -e "Disk Usage:" $diskuse
 echo -e "Load:" $load
 echo -e ""
-echo -e "Server Time:"
+echo -e "Server Time:" 
 date
 }
 
