@@ -43,6 +43,7 @@ TODO:
 	Lots. This is the first release and have much more in mind.
 	-List players logged in.
 	-Send basic commands to bukkit
+	-Add server hostname to status menu.
 
 BUGS:
 	-Fix Disk Usage and Load Avg on some systems.
