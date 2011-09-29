@@ -20,20 +20,21 @@ version=`grep -m 1 "Craftbukkit version" $bukkitdir/server.log |cut -f 10-12 -d 
 MCPID=`ps -ef |grep -i craftbukkit-0.0.1-SNAPSHOT.jar |grep -v grep |awk '{ print $2 }'`
 flags=`ps -ef |grep -i craft |egrep -v "grep|tail|wget"|sed s'/^.*java/java/'`
 load=`uptime|awk -F"average:" '{print $2}'` # Cut everthing after "average:"
-bukkitcpu=`ps -e -o pcpu,args|grep craftbukkit-0.0.1-SNAPSHOT|grep -v grep|sed -e 's/^[ \t]*//'|cut -f1 -d " "`
-memuse=`free -m |grep 'Mem' |awk '{print $1," | " $2," | " $3," | " $4}'`
-swapuse=`free -m |grep 'Swap' |awk '{print $1,"| " $2,"|"" "$3,"   | " $4}'`
+totalCpu=`ps aux | awk '{sum +=$3}; END {print sum}'`
+totalMem=`ps aux | awk '{sum +=$4}; END {print sum}'`
+bukkitCpu=`ps aux | grep -i craftbukkit-0.0.1-SNAPSHOT.jar|grep -v grep| awk '{sum +=$3}; END {print sum}'`
+bukkitMem=`ps aux | grep -i craftbukkit-0.0.1-SNAPSHOT.jar|grep -v grep| awk '{sum +=$4}; END {print sum}'`
 diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
 plugins=`ls $bukkitdir/plugins/|grep .jar |sed 's/\(.*\)\..*/\1/'`
-cpuinfo=`cat /proc/cpuinfo|grep 'model name' |cut -f2 -d ":"|cut -f 1-6 -d " "|head -1`
-cpumhz=`cat /proc/cpuinfo|grep 'cpu MHz' |cut -f2 -d ":"|head -1`
+stime=`date`
 
 clear
+echo -e $txtbld"Bukkit Server Info:"$txtrst
   if [ $MCPID ]; then
     uptime=`ps -p $MCPID -o stime|grep -v STIME`
-    echo -e $txtgrn"Bukkit Running$txtrst Since: "$uptime
+    echo -e $txtgrn"Running$txtrst Since: "$uptime
   elif [ -z $MCPID ]; then 
-    echo -e $txtred"Bukkit Not Running" $txtrst
+    echo -e $txtred"Not Running" $txtrst
   fi
 echo -e $txtbld"Version:"$txtrst $version
 newversion=`grep "lastBuildDate" include/latest_recommended.rss |cut -f 17 -d ">" |sed 's/<\/title//g'|cut -f3 -d " "`
@@ -43,23 +44,17 @@ echo -e $txtred"Update Availible:" $newversion $txtrst
 fi
 fi
 echo -e $txtbld"Start Flags:"$txtrst $flags
-# echo -e $txtbld"Connected Players: X" #--Not Yet Implemented
 echo -e $txtbld"Plugins:"$txtrst $plugins
-echo -e " "
+echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpu"%"
+echo -e $txtbld"Mem Usage:"$txtrst $bukkitMem"%"
+echo 
 echo -e $txtbld"System Info:"$txtrst
-echo -e "Hostname:" $hostname
-echo -e "CPU Make:" $cpuinfo
-echo -e "CPU Speed:" $cpumhz "MHz" 
-echo -e "Bukkit CPU Usage:" $bukkitcpu"%" 
-echo -e "Memory Usage:"
-echo -e "Megabytes    Total   Used   Free "
-echo -e "     $memuse  |"
-echo -e "     $swapuse |"
-echo -e "Disk Usage:" $diskuse
-echo -e "Load:" $load
-echo -e ""
-echo -e "Server Time:" 
-date
+echo -e $txtbld"Hostname:"$txtrst $hostname
+echo -e $txtbld"CPU Usage:"$txtrst $totalCpu"%"
+echo -e $txtbld"Mem Usage:"$txtrst $totalMem"%"
+echo -e $txtbld"Disk Usage:"$txtrst $diskuse
+echo -e $txtbld"Load:"$txtrst $load
+echo -e $txtbld"Time:"$txtrst $stime
 }
 
 checkUpdate () {
