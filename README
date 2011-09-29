@@ -41,6 +41,11 @@ HELP:
 	
 TODO:
 	Lots. This is the first release and have much more in mind.
+	-List players logged in.
+	-Send basic commands to bukkit
+
+BUGS:
+	-Fix Disk Usage and Load Avg on some systems.
 
 THANKS:
 	TnTbass for helping come up with the idea, testing, input, general geekery.
