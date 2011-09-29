@@ -53,8 +53,9 @@ clear
 echo "Bukkit Not Running.."
 sleep 1
 else 
-screen -S bukkitmenu -p 1 -X stuff "stop"
-screen -S bukkit-server -p 0 -X quit
+screen -S bukkit-server -X eval 'stuff stop\015'
+sleep 2
+screen -S bukkit-server -X quit
 fi
 }
 
