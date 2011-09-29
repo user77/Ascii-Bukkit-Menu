@@ -13,6 +13,7 @@ txtcyn=$(tput setaf 6)    # Cyan
 txtwht=$(tput setaf 7)    # White
 txtrst=$(tput sgr0)       # Text reset
 
+hostname=`hostname`
 
 showInfo () {
 version=`grep -m 1 "Craftbukkit version" $bukkitdir/server.log |cut -f 10-12 -d " "|cut -f6 -d "-" |cut -f1 -d " "|sed 's/[a-zA-Z]*//g'`
@@ -46,6 +47,7 @@ echo -e $txtbld"Start Flags:"$txtrst $flags
 echo -e $txtbld"Plugins:"$txtrst $plugins
 echo -e " "
 echo -e $txtbld"System Info:"$txtrst
+echo -e "Hostname:" $hostname
 echo -e "CPU Make:" $cpuinfo
 echo -e "CPU Speed:" $cpumhz "MHz" 
 echo -e "Bukkit CPU Usage:" $bukkitcpu"%" 
