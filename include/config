@@ -1,4 +1,3 @@
 # Absolute path to your bukkit installation. 
 #example: 
-#bukkitdir=/opt/minecraft
-bukkitdir=
+bukkitdir=/opt/minecraft

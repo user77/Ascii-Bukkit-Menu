@@ -5,10 +5,14 @@
  /_/   \_\___/\___|_|_| |____/ \__,_|_|\_\_|\_\_|\__| |_|  |_|\___|_| |_|\__,_|
 
 
-ABOUT: This project aims at creating an interactive menu for the Bukkit Minecraft Server.
-With it you can currently start, stop, restart, and update bukkit server. 
-It will run the server using screen. So if you are running the server remotely (example: through a ssh session) the server will continue to run even when you disconnect. When you connect again, simply start Ascii Bukkit Menu
-again and it will reconnect to the exsiting session.
+ABOUT:  This project aims at creating an interactive menu for the Bukkit Minecraft Server.
+        With it you can currently start, stop, restart, and update bukkit server. As well as see various
+	aspects of the server. It will run the server using screen. So if you are running the server 
+	remotely (example: through a ssh session) the server will continue to run even when you disconnect. 
+	When you connect again, simply start Ascii Bukkit Menu again and it will reconnect to the 
+	exsiting session.
+
+SEE:	https://github.com/user77/Ascii-Bukkit-Menu/wiki/Screenshots
 
 DEPENDENCIES:
 	-Java Runtime Enviroment (http://java.com/en/download/manual.jsp)
@@ -16,19 +20,26 @@ DEPENDENCIES:
 	-screen (http://www.gnu.org/s/screen/)
 	-grep (http://www.gnu.org/s/grep/)
 	-wget (http://www.gnu.org/s/wget/)
+	-unzip
 
 INSTALL:
-	$ tar zxvf abm.tgz -C /path_of_your_choice
-	$ vi include/config
-	Change bukkitdir= to your current bukkit installation directory.
+	Git Method for Latest Build.
+	  $ cd /path_of_your_choice
+	  $ git clone git@github.com:user77/Ascii-Bukkit-Menu.git	
+	  $ cd Ascii-Bukkit-Menu
+	  $ vi include/config
+                   *Change bukkitdir= to your current bukkit installation directory.
 
-	OR
-	$ git clone git@github.com:user77/Ascii-Bukkit-Menu.git
+	Tarball Method.
+	  $ tar zxvf abm.tgz -C /path_of_your_choice
+	  $ vi include/config
+	           *Change bukkitdir= to your current bukkit installation directory.
+
 RUN:
 	If you are running this via PuTTY or any other ssh client. It is recommended you 
 	run your window size at minimum: 120 Columns 45 Rows.
-	$ cd /path_of_your_choice
-	$ ./abm
+	  $ cd /path_of_your_choice/Ascii-Bukkit-Menu
+	  $ ./start.sh
 
 HELP:
 	First check to see you have the correct dependencies as listed above.
@@ -36,25 +47,25 @@ HELP:
 	Including execute permissions on all the .sh files.
 
 	If evertthing has gone off the rails.
-	- $ pkill screen	
+	  $ pkill screen	
 	This will kill all the screen proceses. Everything in this runs under a screen session.
+	If you find a bug, please report it at the link below. See BUGS:
 	
 TODO:
-	Lots. This is the first release and have much more in mind.
-	-Document Code
-	-List players logged in.
+	-Document scripts
+	-Cleanup scripts
 	-Send basic commands to bukkit
-	-Add server hostname to status menu.
+	-Server Commands Submenu. including save, time set (morning, noon, night) ban, kick, op.
+	-Other great ideas I haven't had yet.	
 
 BUGS:
-	-Fix Load Avg on some systems.
-	-Fix Bukkit CPU Usage on some systems.
+	See https://github.com/user77/Ascii-Bukkit-Menu/issues
 
 THANKS:
 	TnTbass for helping come up with the idea, testing, input, general geekery.
 
 Changelog:
-	-Sept 29, 2011 - Updated README, Fixed Disk Usage.
+	-Sept 29, 2011 - Updated README, bug fixes, improved layout.
 	-Sept 28, 2011 - Updated README. Inital Upload of Ascii Bukkit Menu.	
 	-Sept 26, 2011 - Created Github Repo. Created initial README.
 

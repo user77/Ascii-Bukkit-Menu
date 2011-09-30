@@ -109,7 +109,6 @@ do
 		"3")	clear	
 			echo "Restarting Server.."
 			stopServer
-			sleep 1
 			startServer
 			;;
 
