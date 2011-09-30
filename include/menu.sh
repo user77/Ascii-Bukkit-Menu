@@ -53,9 +53,14 @@ clear
 echo "Bukkit Not Running.."
 sleep 1
 else 
-screen -S bukkit-server -X eval 'stuff stop\015'
-sleep 2
-screen -S bukkit-server -X quit
+ screen -S bukkit-server -p 0 -X eval 'stuff "stop"\015'   
+   while [ $MCPID ] 
+    do
+     echo "Bukkit Shutdown in Progress.."
+      checkServer
+      clear
+    done
+  screen -S bukkit-server -X quit
 fi
 }
 
@@ -63,8 +68,7 @@ showMenu () {
         echo "1:$txtgrn Start"$txtrst
         echo "2:$txtred Stop"$txtrst
         echo "3:$txtylw Restart"$txtrst
-	echo "4:$txtwht Clear Log Window"$txtrst
-	echo "5:$txtwht Update Bukkit to Latest"$txtrst
+	echo "4:$txtwht Update Bukkit to Latest"$txtrst
 	echo
         echo "q:$txtred Quit Bukkit Menu"$txtrst
 }
@@ -86,7 +90,6 @@ do
 		"2")	clear	
 			echo "Stopping Server.."
                         stopServer 
-			sleep 1
 			;;
 
 		"3")	clear	
@@ -96,10 +99,7 @@ do
 			startServer
 			;;
 
-		"4")	screen -S bukkitmenu -p 1 -X exec "clear"
-			;;
-
-		"5")	clear	
+		"4")	clear	
 			update
 			;;
 
