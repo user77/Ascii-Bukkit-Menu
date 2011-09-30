@@ -27,6 +27,9 @@ bukkitMem=`ps aux | grep -i craftbukkit-0.0.1-SNAPSHOT.jar|grep -v grep| awk '{s
 diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
 plugins=`ls $bukkitdir/plugins/|grep .jar |sed 's/\(.*\)\..*/\1/'`
 stime=`date`
+if [ -f "$bukkitdir/plugins/Minequery.jar" ]; then
+  players=`echo "QUERY" |nc localhost 25566 |grep PLAYERLIST|awk -F"PLAYERLIST" '{print $2}'|sed -e 's/^[ \t]*//'` 
+fi
 
 clear
 echo -e $txtbld"Bukkit Server Info:"$txtrst
@@ -47,6 +50,10 @@ echo -e $txtbld"Start Flags:"$txtrst $flags
 echo -e $txtbld"Plugins:"$txtrst $plugins
 echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpu"%"
 echo -e $txtbld"Mem Usage:"$txtrst $bukkitMem"%"
+if [ $players ]; then
+echo -e $txtbld"Connected Players:"$txtrst $players
+fi
+
 echo 
 echo -e $txtbld"System Info:"$txtrst
 echo -e $txtbld"Hostname:"$txtrst $hostname

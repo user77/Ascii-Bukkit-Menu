@@ -27,6 +27,15 @@ cat /dev/null > $bukkitdir/server.log
 startServer
 }
 
+installmq () {
+wget -m -nd --progress=dot:mega -P $bukkitdir/plugins https://github.com/downloads/vexsoftware/minequery/Minequery-1.5.zip
+unzip -o $bukkitdir/plugins/Minequery-1.5.zip -d $bukkitdir/plugins/
+rm $bukkitdir/plugins/Minequery-1.5.zip
+stopServer
+startServer
+}
+
+
 startServer () {
 clear
 checkServer
@@ -69,6 +78,11 @@ showMenu () {
         echo "2:$txtred Stop"$txtrst
         echo "3:$txtylw Restart"$txtrst
 	echo "4:$txtwht Update Bukkit to Latest"$txtrst
+	if [ ! -f "$bukkitdir/plugins/Minequery.jar" ]; then 
+	echo "5:$txtwht Install Minequery"$txtrst
+	echo "    -Adds Functionality"
+	echo "    -Will Restart Bukkit"
+	fi
 	echo
         echo "q:$txtred Quit Bukkit Menu"$txtrst
 }
@@ -101,6 +115,10 @@ do
 
 		"4")	clear	
 			update
+			;;
+
+		"5")    installmq  #install MineQuery Plugin
+			clear
 			;;
 
 		"q")	clear
