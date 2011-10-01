@@ -1,7 +1,13 @@
 #!/bin/bash
+
+# Read Config File
 source include/config
-if [ -z $bukkitdir ];then
- echo "Plese Edit include/config.."
+
+# If Config has not beed edited, then exit.
+if [[ -z $bukkitdir ]]; then
+	echo "Plese Edit include/config"
+	exit 0
 else
-screen -c include/screen.conf
+	# Start the screen sessions.
+	screen -c include/screen.conf
 fi
