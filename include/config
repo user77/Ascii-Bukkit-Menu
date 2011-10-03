@@ -1,4 +1,6 @@
 # Absolute path to your bukkit installation. Example: 
 #bukkitdir=/opt/minecraft
-
 bukkitdir=
+
+# Set Status Refresh rate in seconds
+tick=5
