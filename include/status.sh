@@ -32,7 +32,7 @@ showInfo () {
     players=`echo "QUERY" |nc localhost 25566 |grep PLAYERLIST|awk -F"PLAYERLIST" '{print $2}'|sed -e 's/^[ \t]*//'`
   fi
   clear
-  echo -e $txtbld"Bukkit Server Info:"$txtrst
+  echo -e $txtrst$txtbld"Bukkit Server Info:"$txtrst
   if [[ $MCPID ]]; then
     uptime=`ps -p $MCPID -o stime|grep -v STIME`
     echo -e $txtgrn"Running$txtrst Since: "$uptime
