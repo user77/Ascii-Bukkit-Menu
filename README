@@ -11,6 +11,8 @@ ABOUT:  This project aims at creating an interactive menu for the Bukkit Minecra
 	remotely (example: through a ssh session) the server will continue to run even when you disconnect. 
 	When you connect again, simply start Ascii Bukkit Menu again and it will reconnect to the 
 	exsiting session.
+	For added functionality install MineQuery. http://bit.ly/rbGmlD  
+	Will install in the menu if you like.
 
 SEE:	https://github.com/user77/Ascii-Bukkit-Menu/wiki/Screenshots
 
@@ -52,19 +54,18 @@ HELP:
 	If you find a bug, please report it at the link below. See BUGS:
 	
 TODO:
-	-Document scripts
-	-Cleanup scripts
 	-Send basic commands to bukkit
 	-Server Commands Submenu. including save, time set (morning, noon, night) ban, kick, op.
 	-Other great ideas I haven't had yet.	
 
 BUGS:
-	See https://github.com/user77/Ascii-Bukkit-Menu/issues
+	See http://bit.ly/nd4MZV  
 
 THANKS:
 	TnTbass for helping come up with the idea, testing, input, general geekery.
 
 Changelog:
+	-Oct 2, 2011 - Cleaned up code, bug fixes.
 	-Sept 29, 2011 - Updated README, bug fixes, improved layout.
 	-Sept 28, 2011 - Updated README. Inital Upload of Ascii Bukkit Menu.	
 	-Sept 26, 2011 - Created Github Repo. Created initial README.
