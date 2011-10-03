@@ -53,7 +53,7 @@ startServer () {
 		if [[ -z $serverscreenpid ]]; then
 			screen -d -m -S bukkit-server
 		fi
-		screen -S bukkit-server -p 0 -X exec java $jargs -jar $bukkitdir/craftbukkit-0.0.1-SNAPSHOT.jar
+		screen -S bukkit-server -p 0 -X exec java $jargs -jar $bukkitdir/craftbukkit-0.0.1-SNAPSHOT.jar nogui
 		cd -
 	elif [[ $MCPID ]]; then
 			echo -e "Server Already Running.."
