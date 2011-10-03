@@ -18,7 +18,6 @@ hostname=`hostname`
 showInfo () {
   version=`grep -m 1 "Craftbukkit version" $bukkitdir/server.log |cut -f 10-12 -d " "|cut -f6 -d "-" |cut -f1 -d " "|sed 's/[a-zA-Z]*//g'`
   MCPID=`ps -ef |grep -i craftbukkit-0.0.1-SNAPSHOT.jar |grep -v grep |awk '{ print $2 }'`
-  flags=`ps -ef |grep -i craft |egrep -v "grep|tail|wget"|sed s'/^.*java/java/'`
   load=`uptime|awk -F"average:" '{print $2}'` # Cut everthing after "average:"
   totalCpu=`ps aux | awk '{sum +=$3}; END {print sum}'`
   totalMem=`ps aux | awk '{sum +=$4}; END {print sum}'`
@@ -46,7 +45,7 @@ showInfo () {
       echo -e $txtred"Update Availible:" $newversion $txtrst
     fi
   fi
-  echo -e $txtbld"Start Flags:"$txtrst $flags
+  echo -e $txtbld"Java Flags:"$txtrst $jargs 
   echo -e $txtbld"Plugins:"$txtrst $plugins
   echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpu"%"
   echo -e $txtbld"Mem Usage:"$txtrst $bukkitMem"%"

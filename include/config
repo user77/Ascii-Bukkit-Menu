@@ -2,5 +2,9 @@
 #bukkitdir=/opt/minecraft
 bukkitdir=
 
+# Java Arguments, change to whaever you like.
+# For a complete list, please see. http://bit.ly/mYKJte
+jargs="-Xincgc -Xmx1g"
+
 # Set Status Refresh rate in seconds
 tick=5
