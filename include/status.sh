@@ -35,8 +35,13 @@ showInfo () {
   if [[ $MCPID ]]; then
     uptime=`ps -p $MCPID -o stime|grep -v STIME`
     echo -e $txtgrn"Running$txtrst Since: "$uptime
-  elif [[ -z $MCPID ]]; then
+  fi 
+  if [[ -z $MCPID ]]; then
     echo -e $txtred"Not Running" $txtrst
+  fi
+  if [[ ! -f $bukkitdir/craftbukkit-0.0.1-SNAPSHOT.jar ]]; then
+    echo -e $txtred"Not Installed"$txtrst
+    echo -e $txtred"Choose Option 4 to install"$txtrst
   fi
   echo -e $txtbld"Version:"$txtrst $version
   newversion=`grep "lastBuildDate" include/latest_recommended.rss |cut -f 17 -d ">" |sed 's/<\/title//g'|cut -f3 -d " "`
