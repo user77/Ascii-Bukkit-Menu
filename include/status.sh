@@ -17,7 +17,7 @@ hostname=`hostname`
 
 showInfo () {
   version=`grep -m 1 "Craftbukkit version" $bukkitdir/server.log |cut -f 10-12 -d " "|cut -f6 -d "-" |cut -f1 -d " "|sed 's/[a-zA-Z]*//g'`
-  MCPID=`ps -ef |grep -i craftbukkit-0.0.1-SNAPSHOT.jar |grep -v grep |awk '{ print $2 }'`
+  MCPID=`ps -ef |grep -i craftbukkit-0.0.1-SNAPSHOT.jar |grep -v grep |grep -v wget |awk '{ print $2 }'`
   load=`uptime|awk -F"average:" '{print $2}'` # Cut everthing after "average:"
   totalCpu=`ps aux | awk '{sum +=$3}; END {print sum}'`
   totalMem=`ps aux | awk '{sum +=$4}; END {print sum}'`
