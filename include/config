@@ -8,3 +8,9 @@ jargs="-Xincgc -Xmx1g"
 
 # Set Status Refresh rate in seconds.
 tick=5
+
+#Are you using a ramdisk? if so change to true. See http://bit.ly/smK9iR for more info.
+ramdisk=false
+
+#If True, set world names with space between.
+worlds=(world world_nether)

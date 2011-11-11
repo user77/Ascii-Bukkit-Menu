@@ -46,6 +46,12 @@ installmq () {
 startServer () {
 	clear
 	checkServer
+	if [ $ramdisk = true ]; then
+		for x in ${worlds[*]}
+		  do
+		 [ "$(ls -A $bukkitdir/$x-offline/)" ] && cp -rf "$bukkitdir/$x-offline/"* "$bukkitdir/$x/"  
+		  done
+	fi
 	# Need to recheck for screen PID for bukket-server session. In case it has been stopped.
 	serverscreenpid=`screen -ls |grep bukkit-server |cut -f 1 -d .`
 	if [[ -z $MCPID ]]; then
@@ -75,6 +81,12 @@ stopServer () {
 			checkServer
       		clear
 		done
+                if [ $ramdisk = true ]; then
+                  for x in ${worlds[*]}
+                    do
+                      cp -rf "$bukkitdir/$x/"* "$bukkitdir/$x-offline/"
+                    done
+                fi
 		screen -S bukkit-server -X quit
 	fi
 }
