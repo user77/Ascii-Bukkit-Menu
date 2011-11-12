@@ -69,6 +69,7 @@ startServer () {
 
 # Stop Bukkit Server
 stopServer () {
+	clear
 	checkServer
 	if [[ -z $MCPID ]]; then
 		clear
@@ -91,19 +92,41 @@ stopServer () {
 	fi
 }
 
+
+# Send Server Commands 
+serverCommands () {
+	clear
+	echo -e "Send Server Command: \c"
+	read command
+	screen -S bukkit-server -p 0 -X eval 'stuff '"\"$command\""'\015'
+}
+
+# Quit Function
+quitFucntion () {
+	clear
+	echo "Bye"
+	$txtrst
+	clear
+	screen -d -S bukkit-server
+	kill $menuscreenpid
+	exit 0
+}
+
+
 # Menu Structure.
 showMenu () {
         echo "1:$txtgrn Start"$txtrst
         echo "2:$txtred Stop"$txtrst
         echo "3:$txtylw Restart"$txtrst
-		echo "4:$txtwht Update Bukkit to Latest"$txtrst
-		if [[ ! -f "$bukkitdir/plugins/Minequery.jar" ]]; then
-			echo "5:$txtwht Install Minequery"$txtrst
-			echo "    -Adds Functionality"
-			echo "    -Will Restart Bukkit"
-		fi
-		echo
-        echo "q:$txtred Quit Bukkit Menu"$txtrst
+	echo "4:$txtwht Send Server Command"$txtrst
+	echo "5:$txtwht Update Bukkit"$txtrst
+	  if [[ ! -f "$bukkitdir/plugins/Minequery.jar" ]]; then
+	    echo "6:$txtwht Install Minequery"$txtrst
+	    echo "    -Adds Functionality"
+	    echo "    -Will Restart Bukkit"
+	  fi
+	echo " "
+        echo "0:$txtred Quit ABM"$txtrst
 }
 
 # Display Menu and wait for choice.
@@ -116,44 +139,36 @@ do
 	read CHOICE
 	case "$CHOICE" in
 		"1")
-			clear
 			echo "Starting Server.."
 			startServer	
 			sleep 1
 			;;
 
 		"2")
-			clear	
 			echo "Stopping Server.."
-            stopServer 
+            		stopServer 
 			;;
 
 		"3")
-			clear	
 			echo "Restarting Server.."
 			stopServer
 			startServer
 			;;
-
-		"4")	
-			clear	
+		"4")
+			serverCommands
+			;;
+		"5")
 			update
 			;;
-
-		"5")    
-			installmq  #install MineQuery Plugin
-			clear
+		"6")
+			installmq
 			;;
-
-		"q")
-			clear
-			echo "Bye"
-         	$txtrst
-			clear
-			screen -d -S bukkit-server
-			kill $menuscreenpid		
-			exit 0
+		"0")
+			quitFucntion
+                        ;;
+		"q")	
+			quitFucntion
 			;;
-		*) echo "\"$CHOICE\" is not valid "; sleep 2 ;;
-	esac
+                *) echo "\"$CHOICE\" is not valid "; sleep 2 ;;
+        esac
 done
