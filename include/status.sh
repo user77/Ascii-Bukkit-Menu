@@ -16,6 +16,7 @@ txtrst=$(tput sgr0)       # Text reset
 hostname=`hostname`
 
 showInfo () {
+  abmversion=`cat include/VERSION`
   version=`grep -m 1 "Craftbukkit version" $bukkitdir/server.log |cut -f 10-12 -d " "|cut -f6 -d "-" |cut -f1 -d " "|sed 's/[a-zA-Z]*//g'`
   MCPID=`ps -ef |grep -i craftbukkit-0.0.1-SNAPSHOT.jar |grep -v grep |grep -v wget |awk '{ print $2 }'`
   load=`uptime|awk -F"average:" '{print $2}'` # Cut everthing after "average:"
@@ -31,7 +32,15 @@ showInfo () {
     players=`echo "QUERY" |nc localhost 25566 |grep PLAYERLIST|awk -F"PLAYERLIST" '{print $2}'|sed -e 's/^[ \t]*//'`
   fi
   clear
-  echo -e $txtbld"Bukkit Server Info:"$txtrst
+  echo -e $txtbld"Ascii Bukkit Menu"$txtrst
+  echo -e $txtbld"Version:"$txtrst $abmversion
+  if [[ -n "$latestabm" ]]; then
+    if [ $latestabm > $abmversion ]; then
+      echo -e $txtred"Update Availible:" $latestabm $txtrst
+    fi
+  fi
+  echo
+  echo -e $txtbld"Bukkit Server Info"$txtrst
   if [[ $MCPID ]]; then
     uptime=`ps -p $MCPID -o stime|grep -v STIME`
     echo -e $txtgrn"Running$txtrst Since: "$uptime
@@ -58,7 +67,7 @@ showInfo () {
     echo -e $txtbld"Connected Players:"$txtrst $players
   fi
   echo 
-  echo -e $txtbld"System Info:"$txtrst
+  echo -e $txtbld"System Info"$txtrst
   echo -e $txtbld"Hostname:"$txtrst $hostname
   echo -e $txtbld"CPU Usage:"$txtrst $totalCpu"%"
   echo -e $txtbld"Mem Usage:"$txtrst $totalMem"%"
@@ -71,11 +80,13 @@ showInfo () {
 checkUpdate () {
   lastup=`cat include/update`
   if [[ $lastup -lt `date "+%y%m%d"` ]]; then
-    echo -e $txtred"Checking for Bukkit Update..."$txtrst
-    wget --quiet -m -nd -P include/ http://ci.bukkit.org/other/latest_recommended.rss
+    echo -e $txtred"Checking for Bukkit and ABM Update..."$txtrst
+    wget --quiet -r http://bit.ly/tTI6g8 -O include/latest_recommended.rss 
+    wget --quiet -r http://bit.ly/vvizIg -O include/latestabm 
     date "+%y%m%d" > include/update
     sleep 2 
     newversion=`grep "lastBuildDate" include/latest_recommended.rss |cut -f 17 -d ">" |sed 's/<\/title//g'|cut -f3 -d " "`
+   latestabm=`cat include/latestabm`
   fi
 }
 
