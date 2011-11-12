@@ -17,6 +17,7 @@ hostname=`hostname`
 
 showInfo () {
   abmversion=`cat include/VERSION`
+  latestabm=`cat include/latestabm`
   version=`grep -m 1 "Craftbukkit version" $bukkitdir/server.log |cut -f 10-12 -d " "|cut -f6 -d "-" |cut -f1 -d " "|sed 's/[a-zA-Z]*//g'`
   MCPID=`ps -ef |grep -i craftbukkit-0.0.1-SNAPSHOT.jar |grep -v grep |grep -v wget |awk '{ print $2 }'`
   load=`uptime|awk -F"average:" '{print $2}'` # Cut everthing after "average:"
@@ -35,7 +36,7 @@ showInfo () {
   echo -e $txtbld"Ascii Bukkit Menu"$txtrst
   echo -e $txtbld"Version:"$txtrst $abmversion
   if [[ -n "$latestabm" ]]; then
-    if [ $latestabm > $abmversion ]; then
+    if [[ "$latestabm" > "$abmversion" ]]; then
       echo -e $txtred"Update Availible:" $latestabm $txtrst
     fi
   fi
