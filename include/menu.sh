@@ -76,6 +76,7 @@ stopServer () {
 		echo "Bukkit Not Running.."
 		sleep 1
 	else
+		screen -S bukkit-server -p 0 -X eval 'stuff "save-all"\015'
 		screen -S bukkit-server -p 0 -X eval 'stuff "stop"\015'
 		while [[ $MCPID ]]; do
 			echo "Bukkit Shutdown in Progress.."
