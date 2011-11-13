@@ -46,12 +46,6 @@ installmq () {
 startServer () {
 	clear
 	checkServer
-	if [ $ramdisk = true ]; then
-		for x in ${worlds[*]}
-		  do
-		 [ "$(ls -A $bukkitdir/$x-offline/)" ] && cp -rf "$bukkitdir/$x-offline/"* "$bukkitdir/$x/"  
-		  done
-	fi
 	# Need to recheck for screen PID for bukket-server session. In case it has been stopped.
 	serverscreenpid=`screen -ls |grep bukkit-server |cut -f 1 -d .`
 	if [[ -z $MCPID ]]; then
@@ -59,6 +53,29 @@ startServer () {
 		if [[ -z $serverscreenpid ]]; then
 			screen -d -m -S bukkit-server
 		fi
+		#if using ramdisk copy from local to ramdisk.
+        	if [ $ramdisk = true ]; then
+                	for x in ${worlds[*]}
+                  	do
+                    	[ "$(ls -A $bukkitdir/$x-offline/)" ] && cp -rfv "$bukkitdir/$x-offline/"* "$bukkitdir/$x/" >>  "$bukkitdir/server.log" || echo "Nothing to Copy..."
+                    	find "$bukkitdir/$x" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " > "$x.md5" 
+                    	find "$bukkitdir/$x-offline" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " > "$x-offline.md5"
+                    	md5=`diff "$x.md5" "$x-offline.md5"`
+                      	  if [ -n "$md5" ]; then
+                            echo $txtred "#### Warning! #### Warning! ####" $txtrst
+                            echo "MD5 Check Failed for $x"
+                            echo "Please investigate."
+                            read -p "Hit any key to continue..."
+                            clear
+                            elif [ -z "$md5" ]; then
+                            echo $txtgrn "Copied $x from Localdisk to Ramdisk Sucessully!" $txtrst
+                            sleep 2 
+                            clear
+                           fi
+                        rm -f "$x.md5" "$x-offline.md5"
+                  	done
+        	fi
+		# Start craftbukkit on existing screen session.
 		screen -S bukkit-server -p 0 -X exec java $jargs -jar $bukkitdir/craftbukkit-0.0.1-SNAPSHOT.jar nogui
 		cd -
 	elif [[ $MCPID ]]; then
@@ -86,7 +103,23 @@ stopServer () {
                 if [ $ramdisk = true ]; then
                   for x in ${worlds[*]}
                     do
-                      cp -rf "$bukkitdir/$x/"* "$bukkitdir/$x-offline/"
+                      cp -rfv "$bukkitdir/$x/"* "$bukkitdir/$x-offline/"  >>  "$bukkitdir/server.log"
+                    find "$bukkitdir/$x" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " > "$x.md5"
+                    find "$bukkitdir/$x-offline" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " > "$x-offline.md5"
+                    md5=`diff "$x.md5" "$x-offline.md5"`
+                      if [ -n "$md5" ]; then
+                        echo $txtred "#### Warning! #### Warning! ####" $txtrst
+                        echo "MD5 Check Failed for $x"
+                        echo "Please investigate."
+                        read -p "Hit any key to continue..."
+			clear
+                        elif [ -z "$md5" ]; then
+			clear
+			echo $txtgrn "Copied $x from Ramdisk to Localdisk Sucessully!" $txtrst
+                        sleep 2 
+			clear
+                        fi
+                        rm -f "$x.md5" "$x-offline.md5"
                     done
                 fi
 		screen -S bukkit-server -X quit
