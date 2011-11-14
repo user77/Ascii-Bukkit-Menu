@@ -49,10 +49,13 @@ startServer () {
 	# Need to recheck for screen PID for bukket-server session. In case it has been stopped.
 	serverscreenpid=`screen -ls |grep bukkit-server |cut -f 1 -d .`
 	if [[ -z $MCPID ]]; then
+		logrotate -f -s include/rotate.state include/rotate.conf
+		rm include/rotate.state
 		cd $bukkitdir
 		if [[ -z $serverscreenpid ]]; then
 			screen -d -m -S bukkit-server
 		fi
+
 		#if using ramdisk copy from local to ramdisk.
         	if [ $ramdisk = true ]; then
                 	for x in ${worlds[*]}

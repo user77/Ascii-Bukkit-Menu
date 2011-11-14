@@ -4,6 +4,21 @@
 source include/config
 cols=`tput cols`
 lines=`tput lines`
+# Check for Logrotate config
+if [ ! -d "$bukkitdir/logs" ]; then
+mkdir $bukkitdir/logs
+fi
+
+if [ ! -e "include/rotate.conf" ]; then
+cat > "include/rotate.conf" <<EOF
+"$bukkitdir/server.log" {
+copytruncate
+rotate 20
+compress
+olddir $bukkitdir/logs/
+}
+EOF
+fi
 
 # If Config has not beed edited, then exit.
 if [[ -z $bukkitdir ]]; then
