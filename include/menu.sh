@@ -58,8 +58,8 @@ startServer () {
                 	for x in ${worlds[*]}
                   	do
                     	[ "$(ls -A $bukkitdir/$x-offline/)" ] && cp -rfv "$bukkitdir/$x-offline/"* "$bukkitdir/$x/" >>  "$bukkitdir/server.log" || echo "Nothing to Copy..."
-                    	find "$bukkitdir/$x" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " > "$x.md5" 
-                    	find "$bukkitdir/$x-offline" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " > "$x-offline.md5"
+                    	find "$bukkitdir/$x" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn  > "$x.md5" 
+                    	find "$bukkitdir/$x-offline" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$x-offline.md5"
                     	md5=`diff "$x.md5" "$x-offline.md5"`
                       	  if [ -n "$md5" ]; then
                             echo $txtred "#### Warning! #### Warning! ####" $txtrst
@@ -104,8 +104,8 @@ stopServer () {
                   for x in ${worlds[*]}
                     do
                       cp -rfv "$bukkitdir/$x/"* "$bukkitdir/$x-offline/"  >>  "$bukkitdir/server.log"
-                    find "$bukkitdir/$x" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " > "$x.md5"
-                    find "$bukkitdir/$x-offline" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " > "$x-offline.md5"
+                    find "$bukkitdir/$x" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$x.md5"
+                    find "$bukkitdir/$x-offline" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$x-offline.md5"
                     md5=`diff "$x.md5" "$x-offline.md5"`
                       if [ -n "$md5" ]; then
                         echo $txtred "#### Warning! #### Warning! ####" $txtrst
