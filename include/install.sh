@@ -153,7 +153,7 @@ echo "This script will install Ascii Bukkit Menu."
 read -p "Enter To Proceed, Control+C to Quit."
 
 echo "Downloading ABM..."
-wget --progress=bar http://www.digitalammo.org/abm/releases/abm-$latest.zip -O abm-$latest.zip
+wget --progress=bar http://dev.bukkit.org/media/files/552/980/abm-0.1.7.zip  -O abm-$latest.zip
 echo "Download Complete."
 
 installLocation
