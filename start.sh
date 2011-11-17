@@ -9,7 +9,6 @@ if [ ! -d "$bukkitdir/logs" ]; then
 mkdir $bukkitdir/logs
 fi
 
-if [ ! -e "include/rotate.conf" ]; then
 cat > "include/rotate.conf" <<EOF
 "$bukkitdir/server.log" {
 copytruncate
@@ -18,7 +17,6 @@ compress
 olddir $bukkitdir/logs/
 }
 EOF
-fi
 
 # If Config has not beed edited, then exit.
 if [[ -z $bukkitdir ]]; then
@@ -48,7 +46,7 @@ echo " / ____ \\\\__ \ (__| | | | |_) | |_| |   <|   <| | |_  | |  | |  __/ | | 
 echo "/_/    \_\___/\___|_|_| |____/ \__,_|_|\_\_|\_\_|\__| |_|  |_|\___|_| |_|\__,_|"
 echo "                                                                               "
 echo
-sleep 1
+sleep 0.5 
 clear
 
 	screen -c include/screen.conf
