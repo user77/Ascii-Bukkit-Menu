@@ -1,0 +1,36 @@
+#!/bin/bash
+abmdir=
+abmconfig="$abmdir/include/config/abm.conf"
+source $abmconfig 2>/dev/null
+
+hostname=`hostname`
+
+# Text color variables
+txtund=$(tput sgr 0 1)    # Underline
+txtbld=$(tput bold)       # Bold
+txtred=$(tput setaf 1)    # Red
+txtgrn=$(tput setaf 2)    # Green
+txtylw=$(tput setaf 3)    # Yellow
+txtblu=$(tput setaf 4)    # Blue
+txtpur=$(tput setaf 5)    # Purple
+txtcyn=$(tput setaf 6)    # Cyan
+txtwht=$(tput setaf 7)    # White
+txtrst=$(tput sgr0)       # Text reset
+
+#Display
+cols=`tput cols`
+lines=`tput lines`
+
+## Locations and Files
+screenconf="$abmdir/include/config/screen.conf"
+lrconf="$abmdir/include/config/rotate.conf"
+slog="$bukkitdir/server.log"
+logs="$bukkitdir/logs/"
+
+
+# Find PID of the screen session for the menu.
+menuscreenpid=`screen -ls |grep abm |cut -f 1 -d .`
+
+# craftbukkit
+cbfile=craftbukkit-*.jar
+
