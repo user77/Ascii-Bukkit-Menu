@@ -1,7 +1,8 @@
 #!/bin/bash
 dir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 abmdir=
-
+abmid=$RANDOM
+export abmid=$abmid
 clear
 if [ -z $abmdir ]; then
 	echo "ABM First Run."

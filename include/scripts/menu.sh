@@ -14,9 +14,10 @@ showMenu () {
         echo "2:$txtred Stop"$txtrst
         echo "3:$txtylw Restart"$txtrst
 	echo "4:$txtwht Send Server Command"$txtrst
-	echo "5:$txtwht Update Bukkit"$txtrst
+	echo "5:$txtwht Say"$txtrst
+	echo "6:$txtwht Update Bukkit"$txtrst
 	  if [[ ! -f "$bukkitdir/plugins/Minequery.jar" ]]; then
-	    echo "6:$txtwht Install Minequery"$txtrst
+	    echo "7:$txtwht Install Minequery"$txtrst
 	    echo "    -Adds Functionality"
 	    echo "    -Will Restart Bukkit"
 	  fi
@@ -52,9 +53,15 @@ do
 			serverCommands
 			;;
 		"5")
-			update
+			sayCommand
+			;;
+		"s")
+			sayCommand
 			;;
 		"6")
+			update
+			;;
+		"7")
 			installmq
 			;;
 		"0")

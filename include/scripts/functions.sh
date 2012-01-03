@@ -52,7 +52,6 @@ EOF
 
 # Script to create include/config/abm.conf. This file is a dependency.
 setupConfig () {
-###### Add screen.config at later date. #####
 clear
 echo
 echo "----==== ABM Configuration Setup ====----"
@@ -171,7 +170,7 @@ read -p "Use this Config? [Y/N] " answer
 if [[ $answer =~ ^(yes|y)$ ]]; then
 
 cat > "$abmdir/include/config/abm.conf" <<EOF
-abmversion=0.2.2
+abmversion=0.2.3
 #Bukkit Build Tree latest or recommended
 bbuild=$bbuild
 
@@ -222,7 +221,7 @@ screenversion=`screen -v| awk '{ print $3 }'`
 if [ $screenversion = "4.00.03jw4" ]; then
 cat > "$abmdir/include/config/screen.conf" <<EOF
 startup_message off
-sessionname abm
+sessionname abm-$abmid
 screen -t Server_Status $abmdir/include/scripts/status.sh 
 screen -t Bukkit_Log $abmdir/include/scripts/log.sh 
 screen -t Menu $abmdir/include/scripts/menu.sh
@@ -241,7 +240,7 @@ EOF
 elif [ $screenversion = "4.01.00devel" ]; then
 cat > "$abmdir/include/config/screen.conf" <<EOF
 startup_message off
-sessionname abm
+sessionname abm-$abmid
 screen -t Server_Status $abmdir/include/scripts/status.sh 
 screen -t Bukkit_Log $abmdir/include/scripts/log.sh 
 screen -t Menu $abmdir/include/scripts/menu.sh
@@ -259,7 +258,7 @@ EOF
 else
 cat > "$abmdir/include/config/screen.conf" <<EOF
 startup_message off
-sessionname abm
+sessionname abm-$abmid
 screen -t Server_Status $abmdir/include/scripts/status.sh 
 screen -t Bukkit_Log $abmdir/include/scripts/log.sh 
 screen -t Menu $abmdir/include/scripts/menu.sh
@@ -431,16 +430,24 @@ fi
 
 # Send Server Commands
 serverCommands () {
-        clear
-        echo -e "Send Server Command: \c"
-        read command
-        screen -S bukkit-server -p 0 -X eval 'stuff '"\"$command\""'\015'
+  clear
+  echo -e "Send Server Command: \c"
+  read command
+  screen -S bukkit-server -p 0 -X eval 'stuff '"\"$command\""'\015'
+}
+
+# Say command to server
+sayCommand () {
+ clear
+  echo -e "Say: \c"
+  read comment
+  screen -S bukkit-server -p 0 -X eval 'stuff '"\"say $comment\""'\015' 
 }
 
 # Quit Function
 quitFunction () {
         clear
-        #$txtrst
+        $txtrst
         kill $menuscreenpid
         exit 0
 }
@@ -451,14 +458,19 @@ showInfo () {
   latestabm=`cat $abmdir/include/temp/latestabm`
   build=`cat $abmdir/include/temp/build`
   load=`uptime|awk -F"average:" '{print $2}'` # Cut everthing after "average:"
+  getTop=`top -n 1 -b > $abmdir/include/temp/topinfo`
+  getFree=`free -m > $abmdir/include/temp/freeinfo`
 if [[ $MCPID ]]; then
-  bukkitCpuTop=`top -n 1 -b -p $MCPID |grep $MCPID |awk -F" " '{print $9}'`
-  bukkitMemTop=`top -n 1 -b -p $MCPID |grep $MCPID |awk -F" " '{print $10}'`
+  bukkitCpuTop=`grep $MCPID $abmdir/include/temp/topinfo |awk -F" " '{print $9}'`
+  bukkitMemTop=`grep $MCPID $abmdir/include/temp/topinfo |awk -F" " '{print $10}'`
 fi
-  totalCpuTop=`top -n 1 -b |grep Cpu | cut -d ":" -f 2`
-  totalMem=`free -m |sed -n 2p|awk '{print $2}'`
-  totalMemUsed=`free -m |sed -n 2p|awk '{print $3}'`
-  totalMemFree=`free -m |sed -n 2p|awk '{print $4}'`
+  totalCpuTop=`grep Cpu $abmdir/include/temp/topinfo | cut -d ":" -f 2`
+  totalMem=`sed -n 2p $abmdir/include/temp/freeinfo |awk '{print $2}'`
+  totalMemUsed=`sed -n 2p $abmdir/include/temp/freeinfo |awk '{print $3}'`
+  totalMemFree=`sed -n 2p $abmdir/include/temp/freeinfo |awk '{print $4}'`
+  totalSwap=`sed -n 4p $abmdir/include/temp/freeinfo|awk '{print $2}'`
+  totalSwapUsed=`sed -n 4p $abmdir/include/temp/freeinfo|awk '{print $3}'`
+  totalSwapFree=`sed -n 4p $abmdir/include/temp/freeinfo|awk '{print $4}'`
   diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
   plugins=`ls $bukkitdir/plugins/|grep .jar |sed 's/\(.*\)\..*/\1/'`
   stime=`date`
@@ -506,12 +518,9 @@ craftbukkit=$bukkitdir/$cbfile
 #  fi
   echo -e $txtbld"Java Flags:"$txtrst $jargs
   echo -e $txtbld"Plugins:"$txtrst $plugins
-  #echo -e $txtbld"CPU Usage ps:"$txtrst $bukkitCpuPs"%"
 if [[ $MCPID ]]; then
   echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
-  #echo -e $txtbld"Mem Usage ps:"$txtrst $bukkitMemPs"%"
   echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
-
   if [[ $players ]]; then
     echo -e $txtbld"Connected Players:"$txtrst $players
   fi
@@ -520,8 +529,8 @@ fi
   echo -e $txtbld"System Info"$txtrst
   echo -e $txtbld"Hostname:"$txtrst $hostname
   echo -e $txtbld"CPU Usage:"$txtrst $totalCpuTop
-  echo -e $txtbld"Mem Usage:"$txtrst "Total:" $totalMem"MB" "Used:" $totalMemUsed"MB"  "Free:" $totalMemFree"MB"
-
+  echo -e $txtbld"Mem Usage:"$txtrst "Total: "$totalMem"MB" "Used: "$totalMemUsed"MB"  "Free: "$totalMemFree"MB"
+  echo -e $txtbld"Swap Usage:"$txtrst "Total: "$totalSwap"MB" "Used: "$totalSwapUsed"MB"  "Free: "$totalSwapFree"MB"
   echo -e $txtbld"Disk Usage:"$txtrst $diskuse
   echo -e $txtbld"Load:"$txtrst $load
   echo -e $txtbld"Time:"$txtrst $stime
