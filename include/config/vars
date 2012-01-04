@@ -29,7 +29,7 @@ logs="$bukkitdir/logs/"
 
 
 # Find PID of the screen session for the menu.
-menuscreenpid=`screen -ls |grep abm |cut -f 1 -d .`
+menuscreenpid=`screen -ls |grep abm-$abmid |cut -f 1 -d .`
 
 # craftbukkit
 cbfile=craftbukkit-*.jar
