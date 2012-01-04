@@ -9,7 +9,7 @@ source $vars
 source $abmconfig
 
 # Put somthing into log window so its not empty.
-head -10 $bukkitdir/server.log
+tail -10 $bukkitdir/server.log
 
 # Watch Bukkit Log in screen window Bukkit_Log
 tail -f $bukkitdir/server.log
