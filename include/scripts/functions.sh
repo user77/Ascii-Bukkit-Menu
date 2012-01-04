@@ -1,6 +1,6 @@
 #!bin/bash
 dir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-abmdir=
+abmdir=/var/tmp/Ascii-Bukkit-Menu
 vars="$abmdir/include/config/vars"
 abmconfig="$abmdir/include/config/abm.conf"
 
@@ -382,7 +382,12 @@ stopServer () {
                 echo "Bukkit Not Running.."
                 sleep 1
         else
-		read -p "Confirm Shutdown. [Y/N] " answer
+		if [[ $silent != "--stop" ]]; then
+		  read -p "Confirm Shutdown. [Y/N] " answer
+		fi
+		if [[ $silent = "--stop" ]]; then
+		  answer=y
+		fi
 		if [[ $answer =~ ^(yes|y)$ ]]; then
                 screen -S bukkit-server -p 0 -X eval 'stuff "save-all"\015'
                 screen -S bukkit-server -p 0 -X eval 'stuff "stop"\015'

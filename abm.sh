@@ -1,6 +1,6 @@
 #!/bin/bash
 dir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-abmdir=
+abmdir=/var/tmp/Ascii-Bukkit-Menu
 abmid=$RANDOM
 export abmid=$abmid
 clear
@@ -62,7 +62,16 @@ else
 	if [[ $cols -lt 120 || $lines -lt 50 ]]; then
 		printf '\033[8;50;120t'
 		sleep 0.5 
-	fi
+fi
+
+if [[ $1 = "--start" ]]; then
+	startServer
+	exit 0
+elif [[ $1 = "--stop" ]]; then
+	export silent=$1
+	stopServer
+	exit 0
+fi
 	
 	# Start the screen sessions.
 	createLogrotate
