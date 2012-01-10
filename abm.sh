@@ -1,6 +1,6 @@
 #!/bin/bash
 dir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-abmdir=/var/tmp/Ascii-Bukkit-Menu
+abmdir=
 abmid=$RANDOM
 export abmid=$abmid
 clear
@@ -21,21 +21,25 @@ fi
 functions="$abmdir/include/scripts/functions.sh"
 vars="$abmdir/include/config/vars"
 abmconfig="$abmdir/include/config/abm.conf"
-
+TERM=xterm
 source $functions
 source $vars
 
 if [[ ! -f $abmconfig ]]; then
 	   echo
        echo "ABM configuration incomplete or missing."
-        read -p "Would you like to create one now? [Y/N]: " answer
-          if [[ $answer =~ ^(yes|y)$ ]]; then
+        read -p "Would you like to create one now? [y/n]: " answer
+	case $answer in
+	  [yY] | [yY][eE][Ss] )
             setupConfig
-          elif  [[ $answer =~ ^(no|n)$ ]]; then
+	    ;;
+	  [nN] | [nN][oO] )
             echo "Please edit config manually $abmconfig"
             exit 0
-          fi
-       
+	    ;;
+	*) echo "Invalid Input"
+	   ;;
+	esac
 fi
 
 source $abmconfig
@@ -43,13 +47,18 @@ source $abmconfig
 # If Config has not beed edited, then exit.
 if [[ -z $bukkitdir ]]; then
 	echo "ABM configuration incomplete or missing."
-        read -p "Would you like to create one now? [Y/N]: " answer
-	  if [[ $answer =~ ^(yes|y)$ ]]; then
-            setupConfig
-          elif  [[ $answer =~ ^(no|n)$ ]]; then
+        read -p "Would you like to create one now? [y/n]: " answer
+        case $answer in
+          [yY] | [yY][eE][Ss] )    
+	    setupConfig
+	    ;;
+	  [nN] | [nN][oO] )
             echo "Please edit config manually $abmconfig"
-	  fi
-	exit 0
+	    exit 0
+	    ;;
+          *) echo "Invalid Input"
+	    ;;
+	esac
 
 else
 	if [ $ramdisk = true ]; then
@@ -81,4 +90,5 @@ fi
 	javaCheck
 	screen -c $screenconf
 fi
+clear
 exit 0

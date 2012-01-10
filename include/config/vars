@@ -21,7 +21,7 @@ txtrst=$(tput sgr0)       # Text reset
 cols=`tput cols`
 lines=`tput lines`
 
-## Locations and Files
+# Locations and Files
 screenconf="$abmdir/include/config/screen.conf"
 lrconf="$abmdir/include/config/rotate.conf"
 slog="$bukkitdir/server.log"
@@ -34,3 +34,5 @@ menuscreenpid=`screen -ls |grep abm-$abmid |cut -f 1 -d .`
 # craftbukkit
 cbfile=craftbukkit-*.jar
 
+# sar location
+sarbin=`which sar`

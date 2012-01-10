@@ -1,6 +1,6 @@
 #!bin/bash
 dir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-abmdir=/var/tmp/Ascii-Bukkit-Menu
+abmdir=
 vars="$abmdir/include/config/vars"
 abmconfig="$abmdir/include/config/abm.conf"
 
@@ -34,7 +34,7 @@ javaCheck () {
 createLogsdir () {
 
         if [ ! -d "$logs" ]; then
-          mkdir $logs
+          mkdir $logs 2>/dev/null
         fi
 }
 
@@ -81,7 +81,7 @@ read -p "Would you like Bukkit Latest or Recommended? [l/r] " bbuild
 echo
 echo "Please add any Java arguments you would like. Seperated by space."
 echo "For a complete list, please see: http://bit.ly/mYKJte"
-echo "Default: -Xincgc -Xmx1g"
+echo "Default: -server -Xincgc -Xmx1g"
 echo
 read -p "Java Arguments: " jargs
 
@@ -96,8 +96,8 @@ echo
 echo "Are you using a ramdisk?" 
 echo "See http://bit.ly/smK9iR for more info."
 echo 
-read -p "[Y/N] " ramdisk
-  if [[ $ramdisk =~ ^(yes|y)$ ]]; then
+read -p "[y/n] " ramdisk
+  if [[ $ramdisk =~ ^(yes|y|Y)$ ]]; then
     echo
     echo "Please enter the names of the worlds that should be copied to and from ramdisk to localdisk"
     echo "Use exact names as they show in $bukkitdir separated by space."
@@ -105,43 +105,63 @@ read -p "[Y/N] " ramdisk
     read -p "Worlds: " worlds
   fi
 
+  if [[ $sarbin ]]; then
+    echo
+    echo "Using Sar ABM will show network usage. Please enter the intferace name."
+    echo "For example. Linux=eth0 BSD/Solaris/Arch=bge0 *check dmesg"
+    echo "If you don't know just hit enter."
+    read -p "Interface Name: " $eth
+  fi
+
+clear
+
 # End of Questions. Time to check for missing variables.
 
   if [[ -z $bukkitdir ]]; then
     echo
     echo "Error no Bukkit directory set."
-    read -p "Would you like to run setup again? [Y/N] " answer
-      if [[ $answer =~ ^(yes|y)$ ]]; then
-        setupConfig
-      else 
-        echo
-        echo "Please edit config manually $abmconfig"
-      fi
+    read -p "Would you like to run setup again? [y/n] " answer
+      case $answer in
+	[yY] | [yY][eE][Ss] )
+          setupConfig
+	  ;;
+	[nN] | [nN][oO] )
+	  echo "Please edit config manually $abmconfig"
+	  ;;
+         *) echo "Invalid Input"
+          ;;
+        esac
   fi
   
   if [[ -z $jargs ]]; then
     echo
     echo "No Java Arguments set, using defaults.."
-    jargs="-Xincgc -Xmx1g"
+    jargs="-server -Xincgc -Xmx1g"
+    echo $jargs
+    sleep 1
   fi
 
   if [[ -z $tick ]]; then
     echo
     echo "Refresh not set, using default.."
     tick=5
+    echo $tick
+    sleep 1
   fi
 
   if [[ -z $ramdisk ]]; then
     echo
     echo "Ramdisk not set, using default.."
     ramdisk=false
+    echo $ramdisk
+    sleep 1
   fi
 
-  if [[ $ramdisk =~ ^(yes|y)$ ]]; then
+  if [[ $ramdisk =~ ^(yes|y|Y)$ ]]; then
     ramdisk=true
   fi
 
-  if [[ $ramdisk =~ ^(no|n)$ ]]; then
+  if [[ $ramdisk =~ ^(no|n|N)$ ]]; then
     ramdisk=false
   fi
 
@@ -150,11 +170,24 @@ read -p "[Y/N] " ramdisk
       echo
       echo "Ramdisk Worlds not set. Please try again.."
       read -p "Would you like to run setup again? [Y/N] " answer
-        if [[ $answer =~ ^(yes|y)$ ]]; then
+        if [[ $answer =~ ^(yes|y|Y)$ ]]; then
           setupConfig
         fi
     fi
   fi
+
+  if [[ $sarbin ]]; then
+   if [[ -z $eth ]]; then
+    echo
+    echo "No Interface set."
+    echo "Trying to find out based on default gateway.."
+    eth=`netstat -rn |grep 0.0.0.0 |head -n 1 |awk '{print $8}'`
+    echo "Found:" $eth
+    echo
+    sleep 1
+   fi
+ fi
+sleep 2
 clear
 echo
 echo "Please review:"
@@ -165,12 +198,13 @@ echo "Java Arguments: "$jargs
 echo "Display Refresh: "$tick
 echo "RamDisk Used: "$ramdisk
 echo "RamDisk Worlds: " $worlds
+echo "Interface:" $eth
 echo
-read -p "Use this Config? [Y/N] " answer
-if [[ $answer =~ ^(yes|y)$ ]]; then
-
+read -p "Use this Config? [y/n] " answer
+ case $answer in
+ [yY] | [yY][eE][Ss] )
 cat > "$abmdir/include/config/abm.conf" <<EOF
-abmversion=0.2.3
+abmversion=0.2.4
 #Bukkit Build Tree latest or recommended
 bbuild=$bbuild
 
@@ -190,19 +224,25 @@ ramdisk=$ramdisk
 
 #If True, set world names with space between.
 worlds=( $worlds )
+
+#NIC To use for SAR
+eth=$eth
 EOF
 clear
 echo "$abmconfig written successfully"
- 
-  elif  [[ $answer =~ ^(no|n)$ ]]; then
+;; 
+[nN] | [nN][oO] )
     echo
     read -p "Would you like to run setup again? [Y/N] " answer
-      if [[ $answer =~ ^(yes|y)$ ]]; then
+      if [[ $answer =~ ^(yes|y|Y)$ ]]; then
         setupConfig
-      elif  [[ $answer =~ ^(no|n)$ ]]; then 
+      elif  [[ $answer =~ ^(no|n|N)$ ]]; then 
         echo "Please edit config manually $abmconfig"
       fi
-fi
+;;
+*) echo "Invalid Input"
+;;
+esac
 }
 
 #Create update tracker..
@@ -221,10 +261,14 @@ screenversion=`screen -v| awk '{ print $3 }'`
 if [ $screenversion = "4.00.03jw4" ]; then
 cat > "$abmdir/include/config/screen.conf" <<EOF
 startup_message off
-sessionname abm-$abmid
+altscreen on
+term screen-256color
+termcapinfo xterm*|linux*|rxvt*|Eterm*|screen* OP
+termcapinfo xterm|xterms|xs|rxvt|screen ti@:te@
+sessionname abm-$abmid 
 screen -t Server_Status $abmdir/include/scripts/status.sh 
 screen -t Bukkit_Log $abmdir/include/scripts/log.sh 
-screen -t Menu $abmdir/include/scripts/menu.sh
+screen -t Menu $abmdir/include/scripts/menu.sh 
 select Server_Status 
 split 
 focus  down
@@ -240,6 +284,10 @@ EOF
 elif [ $screenversion = "4.01.00devel" ]; then
 cat > "$abmdir/include/config/screen.conf" <<EOF
 startup_message off
+altscreen on
+term screen-256color
+termcapinfo xterm*|linux*|rxvt*|Eterm*|screen* OP
+termcapinfo xterm|xterms|xs|rxvt|screen ti@:te@
 sessionname abm-$abmid
 screen -t Server_Status $abmdir/include/scripts/status.sh 
 screen -t Bukkit_Log $abmdir/include/scripts/log.sh 
@@ -258,6 +306,10 @@ EOF
 else
 cat > "$abmdir/include/config/screen.conf" <<EOF
 startup_message off
+altscreen on
+term screen-256color
+termcapinfo xterm*|linux*|rxvt*|Eterm*|screen* OP
+termcapinfo xterm|xterms|xs|rxvt|screen ti@:te@
 sessionname abm-$abmid
 screen -t Server_Status $abmdir/include/scripts/status.sh 
 screen -t Bukkit_Log $abmdir/include/scripts/log.sh 
@@ -388,20 +440,20 @@ stopServer () {
 		if [[ $silent = "--stop" ]]; then
 		  answer=y
 		fi
-		if [[ $answer =~ ^(yes|y)$ ]]; then
-                screen -S bukkit-server -p 0 -X eval 'stuff "save-all"\015'
-                screen -S bukkit-server -p 0 -X eval 'stuff "stop"\015'
-                while [[ $MCPID ]]; do
-                        echo "Bukkit Shutdown in Progress.."
-                        checkServer
-                clear
-                done
-                if [ $ramdisk = true ]; then
-                  read -p "Would you like copy from ram disk to local disk? [Y/N] " answer
-                    if [[ $answer =~ ^(yes|y)$ ]]; then
-                  for x in ${worlds[*]}
-                    do
-                      cp -rfv "$bukkitdir/$x/"* "$bukkitdir/$x-offline/"  >>  "$bukkitdir/server.log"
+		if [[ $answer =~ ^(yes|y|Y)$ ]]; then
+      screen -S bukkit-server -p 0 -X eval 'stuff "save-all"\015'
+      screen -S bukkit-server -p 0 -X eval 'stuff "stop"\015'
+        while [[ $MCPID ]]; do
+          echo "Bukkit Shutdown in Progress.."
+          checkServer
+          clear
+        done
+          if [ $ramdisk = true ]; then
+            read -p "Would you like copy from ram disk to local disk? [Y/N] " answer
+              if [[ $answer =~ ^(yes|y|Y)$ ]]; then
+                for x in ${worlds[*]}
+                  do
+                    cp -rfv "$bukkitdir/$x/"* "$bukkitdir/$x-offline/"  >>  "$bukkitdir/server.log"
                     find "$bukkitdir/$x" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$abmdir/include/temp/$x.md5"
                     find "$bukkitdir/$x-offline" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$abmdir/include/temp/$x-offline.md5"
                     md5=`diff "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"`
@@ -411,18 +463,18 @@ stopServer () {
                         echo "Please investigate."
                         read -p "Hit any key to continue..."
                         clear
-                        elif [ -z "$md5" ]; then
+                      elif [ -z "$md5" ]; then
                         clear
                         echo $txtgrn "Copied $x from ram disk to local disk sucessully!" $txtrst
                         sleep 2
                         clear
-                        fi
-                        rm -f "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"
-                    done
-                    fi
-                fi
-                screen -S bukkit-server -X quit
-		fi
+                      fi
+                    rm -f "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"
+                  done
+              fi
+          fi
+        screen -S bukkit-server -X quit
+		      fi
         fi
 }
 
@@ -451,10 +503,13 @@ sayCommand () {
 
 # Quit Function
 quitFunction () {
-        clear
-        $txtrst
-        kill $menuscreenpid
-        exit 0
+  # Clean Up Temp Files
+	rm $abmdir/include/temp/topinfo-$abmid
+	rm $abmdir/include/temp/freeinfo-$abmid
+	rm $abmdir/include/temp/sarinfo-$abmid
+  # Kill Screen
+  kill $menuscreenpid
+  exit 0
 }
 
 # This is the main info showed in status.sh
@@ -463,19 +518,24 @@ showInfo () {
   latestabm=`cat $abmdir/include/temp/latestabm`
   build=`cat $abmdir/include/temp/build`
   load=`uptime|awk -F"average:" '{print $2}'` # Cut everthing after "average:"
-  getTop=`top -n 1 -b > $abmdir/include/temp/topinfo`
-  getFree=`free -m > $abmdir/include/temp/freeinfo`
+  getTop=`top -n 1 -b > $abmdir/include/temp/topinfo-$abmid`
+  getFree=`free -m > $abmdir/include/temp/freeinfo-$abmid`
 if [[ $MCPID ]]; then
-  bukkitCpuTop=`grep $MCPID $abmdir/include/temp/topinfo |awk -F" " '{print $9}'`
-  bukkitMemTop=`grep $MCPID $abmdir/include/temp/topinfo |awk -F" " '{print $10}'`
+  bukkitCpuTop=`grep $MCPID $abmdir/include/temp/topinfo-$abmid |awk -F" " '{print $9}'`
+  bukkitMemTop=`grep $MCPID $abmdir/include/temp/topinfo-$abmid |awk -F" " '{print $10}'`
 fi
-  totalCpuTop=`grep Cpu $abmdir/include/temp/topinfo | cut -d ":" -f 2`
-  totalMem=`sed -n 2p $abmdir/include/temp/freeinfo |awk '{print $2}'`
-  totalMemUsed=`sed -n 2p $abmdir/include/temp/freeinfo |awk '{print $3}'`
-  totalMemFree=`sed -n 2p $abmdir/include/temp/freeinfo |awk '{print $4}'`
-  totalSwap=`sed -n 4p $abmdir/include/temp/freeinfo|awk '{print $2}'`
-  totalSwapUsed=`sed -n 4p $abmdir/include/temp/freeinfo|awk '{print $3}'`
-  totalSwapFree=`sed -n 4p $abmdir/include/temp/freeinfo|awk '{print $4}'`
+if [[ $sarbin ]]; then
+  getSar=`sar -n DEV 1 1 |grep $eth |grep -v "Average:"|grep -v lo|awk '{print $6,$7}' > $abmdir/include/temp/sarinfo-$abmid`
+  netrx=`awk {'print $1'} $abmdir/include/temp/sarinfo-$abmid`
+  nettx=`awk {'print $2'} $abmdir/include/temp/sarinfo-$abmid`
+fi
+  totalCpuTop=`grep Cpu $abmdir/include/temp/topinfo-$abmid | cut -d ":" -f 2`
+  totalMem=`sed -n 2p $abmdir/include/temp/freeinfo-$abmid |awk '{print $2}'`
+  totalMemUsed=`sed -n 2p $abmdir/include/temp/freeinfo-$abmid |awk '{print $3}'`
+  totalMemFree=`sed -n 2p $abmdir/include/temp/freeinfo-$abmid |awk '{print $4}'`
+  totalSwap=`sed -n 4p $abmdir/include/temp/freeinfo-$abmid |awk '{print $2}'`
+  totalSwapUsed=`sed -n 4p $abmdir/include/temp/freeinfo-$abmid |awk '{print $3}'`
+  totalSwapFree=`sed -n 4p $abmdir/include/temp/freeinfo-$abmid |awk '{print $4}'`
   diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
   plugins=`ls $bukkitdir/plugins/|grep .jar |sed 's/\(.*\)\..*/\1/'`
   stime=`date`
@@ -537,6 +597,9 @@ fi
   echo -e $txtbld"Mem Usage:"$txtrst "Total: "$totalMem"MB" "Used: "$totalMemUsed"MB"  "Free: "$totalMemFree"MB"
   echo -e $txtbld"Swap Usage:"$txtrst "Total: "$totalSwap"MB" "Used: "$totalSwapUsed"MB"  "Free: "$totalSwapFree"MB"
   echo -e $txtbld"Disk Usage:"$txtrst $diskuse
+if [[ $sarbin ]]; then
+  echo -e $txtbld"Network:"$txtrst RX: $netrx"kB/s" "|" TX: $nettx"kB/s"
+fi
   echo -e $txtbld"Load:"$txtrst $load
   echo -e $txtbld"Time:"$txtrst $stime
 }
