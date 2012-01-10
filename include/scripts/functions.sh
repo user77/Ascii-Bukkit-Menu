@@ -525,7 +525,7 @@ if [[ $MCPID ]]; then
   bukkitMemTop=`grep $MCPID $abmdir/include/temp/topinfo-$abmid |awk -F" " '{print $10}'`
 fi
 if [[ $sarbin ]]; then
-  getSar=`sar -n DEV 1 1 |grep $eth |grep -v "Average:"|grep -v lo|awk '{print $6,$7}' > $abmdir/include/temp/sarinfo-$abmid`
+  getSar=`sar -n DEV 1 1 |grep $eth |grep -v "Average:"|grep -v lo|awk '{print $5,$6}' > $abmdir/include/temp/sarinfo-$abmid`
   netrx=`awk {'print $1'} $abmdir/include/temp/sarinfo-$abmid`
   nettx=`awk {'print $2'} $abmdir/include/temp/sarinfo-$abmid`
 fi
