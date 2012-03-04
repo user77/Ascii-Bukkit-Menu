@@ -11,9 +11,6 @@ source $abmconfig
 #Check for update daily on first startup
 checkUpdate
 banner
-if [ ! -f $abmdir/include/temp/build ]; then
-   getBuild
-fi
 
 # Loop and display status information
 while [[ true ]]; do

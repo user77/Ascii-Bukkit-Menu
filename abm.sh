@@ -1,7 +1,7 @@
 #!/bin/bash
 dir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 abmdir=
-abmid=$RANDOM
+abmid=$$
 export abmid=$abmid
 clear
 if [ -z $abmdir ]; then
@@ -92,3 +92,4 @@ fi
 fi
 clear
 exit 0
+cd -

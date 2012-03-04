@@ -32,7 +32,7 @@ logs="$bukkitdir/logs/"
 menuscreenpid=`screen -ls |grep abm-$abmid |cut -f 1 -d .`
 
 # craftbukkit
-cbfile=craftbukkit-*.jar
+cbfile=craftbukkit*.jar
 
 # sar location
 sarbin=`which sar`

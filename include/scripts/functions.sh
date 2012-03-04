@@ -58,26 +58,13 @@ echo "----==== ABM Configuration Setup ====----"
 echo
 echo "This will guide you through the setup for Ascii Bukkit Menu."
 echo "If you decide not to answer a question, defaults will be used."
+echo "By default ABM uses the Recommended Build of Craftbukkit."
+echo 
 echo
 echo "Please enter the absolute path to your Bukkit installation."
 echo "Example: /opt/craftbukkit"
 echo
 read -p "Bukkit Path: " bukkitdir
-
-read -p "Would you like Bukkit Latest or Recommended? [l/r] " bbuild
-  if [[ $bbuild =~ ^(latest|l)$ ]]; then
-    echo
-    echo "Latest Bukkit build selected."
-    bbuild=latest
-  elif [[ $bbuild =~ ^(recommended|r)$ ]]; then
-    echo
-    echo "Recommended Bukkit build selected."
-    bbuild=recommended
-  else
-    echo "Invalid Selection, assuming Recommended."
-    bbuild=recommended
-  fi
-
 echo
 echo "Please add any Java arguments you would like. Seperated by space."
 echo "For a complete list, please see: http://bit.ly/mYKJte"
@@ -192,7 +179,6 @@ clear
 echo
 echo "Please review:"
 echo
-echo "Bukkit Build Tree: "$bbuild
 echo "Bukkit Directory: "$bukkitdir
 echo "Java Arguments: "$jargs
 echo "Display Refresh: "$tick
@@ -204,9 +190,7 @@ read -p "Use this Config? [y/n] " answer
  case $answer in
  [yY] | [yY][eE][Ss] )
 cat > "$abmdir/include/config/abm.conf" <<EOF
-abmversion=0.2.4
-#Bukkit Build Tree latest or recommended
-bbuild=$bbuild
+abmversion=0.2.5
 
 # Absolute path to your bukkit installation. Example:
 #bukkitdir=/opt/minecraft
@@ -330,39 +314,31 @@ fi
 
 # Find PID of Bukkit Server.
 checkServer () {
-        MCPID=`ps -ef |grep -i craftbukkit-* |grep -v grep |awk '{ print $2 }'`
+        MCPID=`ps -ef |grep -i craftbukkit* |grep -v grep |awk '{ print $2 }'`
 }
 
 # Update Bukkit to Latest.
 update () {
-	if [ $bbuild = "latest" ]; then
-	  wget -m -nd -P $abmdir/include/temp http://ci.bukkit.org/job/dev-CraftBukkit/lastSuccessfulBuild/
-    ver=`grep -o 'artifact/target/[^"]*' $abmdir/include/temp/index.html |head -1`
-	  bukkiturl="http://ci.bukkit.org/job/dev-CraftBukkit/lastSuccessfulBuild/$ver"
-	elif [ $bbuild = "recommended" ]; then
-	      ver=`awk 'NR==2' /opt/minecraft/Ascii-Bukkit-Menu/include/temp/latest_recommended.rss |tr '\076\074' '\076\012\074' | grep "title>" | grep "Build:" | cut -d\> -f2 |awk '{ print $3}'`
-	      link=`awk 'NR==2' /opt/minecraft/Ascii-Bukkit-Menu/include/temp/latest_recommended.rss |tr '\076\074' '\076\012\074' | grep "link>http:" | cut -d\> -f2|grep -v "http://www.bukkit.org"`
-	      bukkiturl="$link/artifact/target/craftbukkit-$ver.jar"
-	fi
         stopServer
-        # Download Latest. Remove old, download latest.
-        rm $bukkitdir/$cbfile
-        wget -m -nd --progress=dot:mega -P $bukkitdir $bukkiturl
-        cat /dev/null > $bukkitdir/server.log
-	      getBuild
-        clear
-        if [ $craftbukkit ]; then
-          echo $txtgrn"Update Successful!"$txtrst
-          sleep 2
+        if [[ ! $MCPID ]]; then
+          # Download Latest.
+          bukkiturl="http://cbukk.it/craftbukkit.jar"
+          wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit.jar"
+          cat /dev/null > $slog
+          rm -f /tmp/plugins-$abmid*
+          rm -f /tmp/build-$abmid*
+	        clear
+            if [ $craftbukkit ]; then
+              echo $txtgrn"Update Successful!"$txtrst
+              sleep 2
+            fi
+          startServer
+        elif [[ $MCPID ]]; then
+          echo -e "Craftbukkit Server Running"
+          echo -e "Update Aborted"
+          sleep 5
         fi
-        startServer
-}
 
-#Unzip MANIFEST.MF, store build number for referance later. Should only be done on new install or update.
-getBuild () { 
-unzip $bukkitdir/$cbfile "META-INF/MANIFEST.MF" -d $abmdir/include/temp > /dev/null
-grep "Implementation-Version" $abmdir/include/temp/META-INF/MANIFEST.MF |awk '{print $2}'> $abmdir/include/temp/build
-rm -rf $abmdir/include/temp/META-INF
 }
 
 # Install MineQuery Plugin. Restart Server.
@@ -371,6 +347,7 @@ installmq () {
         wget -m -nd --progress=dot:mega -P $abmdir/include/temp/ https://github.com/downloads/vexsoftware/minequery/Minequery-1.5.zip
         unzip -o $abmdir/include/temp/Minequery-1.5.zip -d $bukkitdir/plugins
         rm $abmdir/include/temp/Minequery-1.5.zip
+        clear
         stopServer
         startServer
 }
@@ -400,16 +377,12 @@ startServer () {
                         md5=`diff "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"`
                         sleep 5
                           if [ -n "$md5" ]; then
-                            echo $txtred "#### Warning! #### Warning! ####" $txtrst
-                            echo "MD5 Check Failed for $x"
-                            echo "Please investigate."
-                            read -p "Hit any key to continue..."
-                            clear
+                            echo $txtred "#### Warning! #### Warning! ####" $txtrst >> $slog
+                            echo "MD5 Check Failed for $x" >> $slog
+                            echo "Please investigate." >> $slog
                             elif [ -z "$md5" ]; then
-                            echo $txtgrn "Copied $x from local disk to ram disk sucessully!" $txtrst
-                            sleep 2
-                            clear
-                           fi
+                              echo $txtgrn "Copied $x from local disk to ram disk sucessully!" $txtrst >> $slog
+                          fi
                         rm -f "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"
                         done
                     fi
@@ -417,6 +390,7 @@ startServer () {
                 # Start craftbukkit on existing screen session.
                 screen -S bukkit-server -p 0 -X exec java $jargs -jar $bukkitdir/$cbfile nogui
                 cd -
+
         elif [[ $MCPID ]]; then
                         echo -e "Server Already Running.."
                         sleep 1
@@ -474,6 +448,8 @@ stopServer () {
               fi
           fi
         screen -S bukkit-server -X quit
+        rm -f /tmp/plugins-$abmid*
+        rm -f /tmp/build-$abmid*
 		      fi
         fi
 }
@@ -503,41 +479,82 @@ sayCommand () {
 
 # Quit Function
 quitFunction () {
-  # Clean Up Temp Files
-	rm $abmdir/include/temp/topinfo-$abmid
-	rm $abmdir/include/temp/freeinfo-$abmid
-	rm $abmdir/include/temp/sarinfo-$abmid
+# Make sure all temp files are removed. Just in case.
+  rm -f /tmp/topinfo-$abmid*
+  rm -f /tmp/freeinfo-$abmid*
+  rm -f /tmp/sarinfo-$abmid*
+  rm -f /tmp/plugins-$abmid*
+  rm -f /tmp/build-$abmid*
   # Kill Screen
   kill $menuscreenpid
   exit 0
 }
 
+# Get Craftbukkit Version Info
+getVersion () {
+if [ $MCPID ]; then
+  screen -S bukkit-server -p 0 -X eval 'stuff '"version"'\015'
+  sleep 2
+  buildtmp=`mktemp "/tmp/build-$abmid.XXXXXX"`
+  grep "This server is running CraftBukkit" $slog |tail -1 | awk '{print $10, $11, $12}' > $buildtmp
+fi
+}
+
+# Get Plugin Info
+getPlugins () {
+if [ $MCPID ]; then  
+  screen -S bukkit-server -p 0 -X eval 'stuff '"plugins"'\015'
+  sleep 2
+  plugintmp=`mktemp "/tmp/plugins-$abmid.XXXXXX"`
+  grep "Plugins:" $slog |head -1 |awk '{ $1=""; $2=""; $3=""; $4=""; print $0 }' > $plugintmp
+fi
+}
+
 # This is the main info showed in status.sh
 showInfo () {
   checkServer
-  latestabm=`cat $abmdir/include/temp/latestabm`
-  build=`cat $abmdir/include/temp/build`
+  if [ -f $abmdir/include/temp/latestabm ]; then
+    latestabm=`cat $abmdir/include/temp/latestabm`
+  elif [ ! -f $abmdir/include/temp/latestabm ]; then
+    wget --quiet -r http://bit.ly/vvizIg -O  $abmdir/include/temp/latestabm
+  fi
+
+  if [ -f "$buildtmp" ]; then
+    build=`cat $buildtmp`
+  elif [ ! -f "$buildtmp" ]; then
+    build=
+    if [ $MCPID ]; then
+      getVersion
+    fi
+  fi
   load=`uptime|awk -F"average:" '{print $2}'` # Cut everthing after "average:"
-  getTop=`top -n 1 -b > $abmdir/include/temp/topinfo-$abmid`
-  getFree=`free -m > $abmdir/include/temp/freeinfo-$abmid`
-if [[ $MCPID ]]; then
-  bukkitCpuTop=`grep $MCPID $abmdir/include/temp/topinfo-$abmid |awk -F" " '{print $9}'`
-  bukkitMemTop=`grep $MCPID $abmdir/include/temp/topinfo-$abmid |awk -F" " '{print $10}'`
-fi
+  topinfo=`mktemp "/tmp/topinfo-$abmid.XXXXXX"`
+  getTop=`top -n 1 -b > $topinfo`
+  freeinfo=`mktemp "/tmp/freeinfo-$abmid.XXXXXX"`
+  getFree=`free -m > $freeinfo`
+ if [[ $MCPID ]]; then
+  bukkitCpuTop=`grep $MCPID $topinfo |awk -F" " '{print $9}'`
+  bukkitMemTop=`grep $MCPID $topinfo |awk -F" " '{print $10}'`
+ fi
 if [[ $sarbin ]]; then
-  getSar=`sar -n DEV 1 1 |grep $eth |grep -v "Average:"|grep -v lo|awk '{print $5,$6}' > $abmdir/include/temp/sarinfo-$abmid`
-  netrx=`awk {'print $1'} $abmdir/include/temp/sarinfo-$abmid`
-  nettx=`awk {'print $2'} $abmdir/include/temp/sarinfo-$abmid`
+  sarinfo=`mktemp "/tmp/sarinfo-$abmid.XXXXXX"`
+  getSar=`sar -n DEV 1 1 |grep $eth |grep -v "Average:"|grep -v lo|awk '{print $5,$6}' > $sarinfo`
+  netrx=`awk {'print $1'} $sarinfo`
+  nettx=`awk {'print $2'} $sarinfo`
 fi
-  totalCpuTop=`grep Cpu $abmdir/include/temp/topinfo-$abmid | cut -d ":" -f 2`
-  totalMem=`sed -n 2p $abmdir/include/temp/freeinfo-$abmid |awk '{print $2}'`
-  totalMemUsed=`sed -n 2p $abmdir/include/temp/freeinfo-$abmid |awk '{print $3}'`
-  totalMemFree=`sed -n 2p $abmdir/include/temp/freeinfo-$abmid |awk '{print $4}'`
-  totalSwap=`sed -n 4p $abmdir/include/temp/freeinfo-$abmid |awk '{print $2}'`
-  totalSwapUsed=`sed -n 4p $abmdir/include/temp/freeinfo-$abmid |awk '{print $3}'`
-  totalSwapFree=`sed -n 4p $abmdir/include/temp/freeinfo-$abmid |awk '{print $4}'`
+  totalCpuTop=`grep Cpu $topinfo | cut -d ":" -f 2`
+  totalMem=`sed -n 2p $freeinfo |awk '{print $2}'`
+  totalMemUsed=`sed -n 2p $freeinfo |awk '{print $3}'`
+  totalMemFree=`sed -n 2p $freeinfo |awk '{print $4}'`
+  totalSwap=`sed -n 4p $freeinfo |awk '{print $2}'`
+  totalSwapUsed=`sed -n 4p $freeinfo |awk '{print $3}'`
+  totalSwapFree=`sed -n 4p $freeinfo |awk '{print $4}'`
   diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
-  plugins=`ls $bukkitdir/plugins/|grep .jar |sed 's/\(.*\)\..*/\1/'`
+  if [ -s "$plugintmp" ]; then
+    plugins=`cat $plugintmp`
+  elif [ ! -s "$plugintmp" ]; then
+    getPlugins
+  fi
   stime=`date`
   # Check for MineQuery Plugin & Set $players
   if [[ -f "$bukkitdir/plugins/Minequery.jar" ]]; then
@@ -564,25 +581,35 @@ fi
   fi
 craftbukkit=$bukkitdir/$cbfile
   if [ ! -f $craftbukkit ]; then
-    cat /dev/null > $abmdir/include/temp/build 
     echo -e $txtred"Not Installed"$txtrst
-    echo -e $txtred"Choose Option 5 to install"$txtrst
+    echo -e $txtred"Choose Option 6 to install"$txtrst
+    echo -e "If this is your first time installing"
+    echo -e "Craftbukkit, then it is recommended"
+    echo -e "you restart ABM after install."
+    echo
   fi
+if [[ -z $build ]]; then
+  if [[ $MCPID ]]; then
+    echo -e $txtbld"Build:"$txtrst "Loading..."
+  elif [[ -z $MCPID ]]; then
+    echo -e $txtbld"Build:"$txtrst
+  fi
+elif [[ $build ]]; then
   echo -e $txtbld"Build:"$txtrst $build
+fi
 
-   # if [ $bbuild = "latest" ]; then
-      #newbuild=`grep "lastBuildDate" $abmdir/include/temp/latest_recommended.rss |cut -f 17 -d ">" |sed 's/<\/title//g'|cut -f3 -d " "`
-    #elif [ $bbuild = "recommended" ]; then
-      #newbuild=`awk 'NR==2' /opt/minecraft/Ascii-Bukkit-Menu/include/temp/latest_recommended.rss |tr '\076\074' '\076\012\074' | #grep "title>" | grep "Build:" | cut -d\> -f2 |awk '{ print $3}'`
-    #fi
-
-#  if [[ -n "$build" ]]; then
-#    if [[ "$newbuild" -gt "$build" ]]; then
-#      echo -e $txtred"Update Availible:" $newbuild $txtrst
-#    fi
-#  fi
   echo -e $txtbld"Java Flags:"$txtrst $jargs
+
+if [[ -z $plugins ]]; then
+ if [[ $MCPID ]]; then
+    echo -e $txtbld"Plugins:"$txtrst "Loading..." 
+  elif [[ -z $MCPID ]]; then
+    echo -e $txtbld"Plugins:"$txtrst 
+  fi  
+elif [[ $plugins ]]; then
   echo -e $txtbld"Plugins:"$txtrst $plugins
+fi
+
 if [[ $MCPID ]]; then
   echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
   echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
@@ -602,6 +629,10 @@ if [[ $sarbin ]]; then
 fi
   echo -e $txtbld"Load:"$txtrst $load
   echo -e $txtbld"Time:"$txtrst $stime
+
+  rm -f $topinfo
+  rm -f $freeinfo
+  rm -f $sarinfo
 }
 
 
@@ -610,12 +641,9 @@ checkUpdate () {
   lastup=`cat $abmdir/include/config/update`
   if [[ $lastup -lt `date "+%y%m%d"` ]]; then
     echo -e $txtred"Checking for Bukkit and ABM Update..."$txtrst
-    getBuild 
-    wget --quiet -r http://bit.ly/tTI6g8 -O  $abmdir/include/temp/latest_recommended.rss
     wget --quiet -r http://bit.ly/vvizIg -O  $abmdir/include/temp/latestabm
     date "+%y%m%d" > $abmdir/include/config/update
     sleep 2
-    newbuild=`grep "lastBuildDate"  $abmdir/include/temp/latest_recommended.rss |cut -f 17 -d ">" |sed 's/<\/title//g'|cut -f3 -d " "`
-   latestabm=`cat $abmdir/include/temp/latestabm`
+    latestabm=`cat $abmdir/include/temp/latestabm`
   fi
 }
