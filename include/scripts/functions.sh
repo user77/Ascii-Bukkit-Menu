@@ -503,9 +503,10 @@ fi
 # Get Plugin Info
 getPlugins () {
 if [ $MCPID ]; then  
+  rm -f /tmp/plugins-$abmid*
   screen -S bukkit-server -p 0 -X eval 'stuff '"plugins"'\015'
-  sleep 2
   plugintmp=`mktemp "/tmp/plugins-$abmid.XXXXXX"`
+  sleep 5
   grep "Plugins:" $slog |head -1 |awk '{ $1=""; $2=""; $3=""; $4=""; print $0 }' > $plugintmp
 fi
 }
@@ -583,9 +584,6 @@ craftbukkit=$bukkitdir/$cbfile
   if [ ! -f $craftbukkit ]; then
     echo -e $txtred"Not Installed"$txtrst
     echo -e $txtred"Choose Option 6 to install"$txtrst
-    echo -e "If this is your first time installing"
-    echo -e "Craftbukkit, then it is recommended"
-    echo -e "you restart ABM after install."
     echo
   fi
 if [[ -z $build ]]; then
