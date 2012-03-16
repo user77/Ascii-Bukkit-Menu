@@ -81,6 +81,20 @@ elif [[ $1 = "--stop" ]]; then
 	stopServer
 	exit 0
 fi
+
+manybukkits=`ls $bukkitdir/craftbukkit*.jar|wc -l`
+if [[ $manybukkits > 1 ]]; then
+	echo "You appear to have multiple copies of a craftbukkit*.jar"
+	echo "in you CraftBukkit directory. This may cause unexpected"
+	echo "results with ABM."
+	echo
+	ls -lah $bukkitdir/craftbukkit*.jar
+	echo
+	read -p "Would you like to continue? [y/n] " proceed
+	if [[ $proceed =~ ^(no|n|N)$ ]]; then
+		exit 0
+	fi
+fi
 	
 	# Start the screen sessions.
 	createLogrotate

@@ -58,8 +58,11 @@ echo "----==== ABM Configuration Setup ====----"
 echo
 echo "This will guide you through the setup for Ascii Bukkit Menu."
 echo "If you decide not to answer a question, defaults will be used."
-echo "By default ABM uses the Recommended Build of Craftbukkit."
 echo 
+echo "Would you like to use the Recommended or Development version"
+echo "of CraftBukkit? [r/d]"
+echo
+read -p "Bukkit Branch: " bukkitBranch
 echo
 echo "Please enter the absolute path to your Bukkit installation."
 echo "Example: /opt/craftbukkit"
@@ -103,10 +106,24 @@ read -p "[y/n] " ramdisk
 clear
 
 # End of Questions. Time to check for missing variables.
+  if [[ -z $bukkitBranch ]]; then
+    echo
+    echo "No CraftBukkit Branch set. Assuming Recommended."
+    bukkitBranch=recommended
+  elif [[ $bukkitBranch ]]; then
+    if [[ $bukkitBranch =~ ^(recommended|Recommended|r|R)$ ]]; then
+      bukkitBranch=recommended
+    elif [[ $bukkitBranch =~ ^(development|Development|d|D)$ ]]; then
+      bukkitBranch=development
+    else
+      bukkitBranch=recommended
+    fi
+   echo "Craftbukkit Branch set to:" $bukkitBranch
+  fi
 
   if [[ -z $bukkitdir ]]; then
     echo
-    echo "Error no Bukkit directory set."
+    echo "Error no CraftBukkit directory set."
     read -p "Would you like to run setup again? [y/n] " answer
       case $answer in
 	[yY] | [yY][eE][Ss] )
@@ -179,7 +196,8 @@ clear
 echo
 echo "Please review:"
 echo
-echo "Bukkit Directory: "$bukkitdir
+echo "CraftBukkit Branch: "$bukkitBranch 
+echo "CraftBukkit Directory: "$bukkitdir
 echo "Java Arguments: "$jargs
 echo "Display Refresh: "$tick
 echo "RamDisk Used: "$ramdisk
@@ -190,9 +208,11 @@ read -p "Use this Config? [y/n] " answer
  case $answer in
  [yY] | [yY][eE][Ss] )
 cat > "$abmdir/include/config/abm.conf" <<EOF
-abmversion=0.2.5
+abmversion=0.2.6
 
-# Absolute path to your bukkit installation. Example:
+bukkitBranch=$bukkitBranch
+
+# Absolute path to your CraftBukkit installation. Example:
 #bukkitdir=/opt/minecraft
 bukkitdir=$bukkitdir
 
@@ -321,9 +341,16 @@ checkServer () {
 update () {
         stopServer
         if [[ ! $MCPID ]]; then
-          # Download Latest.
-          bukkiturl="http://cbukk.it/craftbukkit.jar"
-          wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit.jar"
+          if [ $bukkitBranch = "recommended" ]; then
+            bukkiturl="http://cbukk.it/craftbukkit.jar"
+            wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit.jar"
+          elif [ $bukkitBranch = "development" ]; then 
+            bukkiturl="http://cbukk.it/craftbukkit-dev.jar"
+            wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit-dev.jar"
+          else
+            echo "Bukkit Branch not set."
+            echo "Please check your ABM Config."
+          fi
           cat /dev/null > $slog
           rm -f /tmp/plugins-$abmid*
           rm -f /tmp/build-$abmid*
@@ -485,6 +512,7 @@ quitFunction () {
   rm -f /tmp/sarinfo-$abmid*
   rm -f /tmp/plugins-$abmid*
   rm -f /tmp/build-$abmid*
+  rm -f /tmp/minequeryinfo-$abmid.*
   # Kill Screen
   kill $menuscreenpid
   exit 0
@@ -503,10 +531,9 @@ fi
 # Get Plugin Info
 getPlugins () {
 if [ $MCPID ]; then  
-  rm -f /tmp/plugins-$abmid*
   screen -S bukkit-server -p 0 -X eval 'stuff '"plugins"'\015'
+  sleep 2
   plugintmp=`mktemp "/tmp/plugins-$abmid.XXXXXX"`
-  sleep 5
   grep "Plugins:" $slog |head -1 |awk '{ $1=""; $2=""; $3=""; $4=""; print $0 }' > $plugintmp
 fi
 }
@@ -542,6 +569,7 @@ if [[ $sarbin ]]; then
   getSar=`sar -n DEV 1 1 |grep $eth |grep -v "Average:"|grep -v lo|awk '{print $5,$6}' > $sarinfo`
   netrx=`awk {'print $1'} $sarinfo`
   nettx=`awk {'print $2'} $sarinfo`
+  rm -f $sarinfo
 fi
   totalCpuTop=`grep Cpu $topinfo | cut -d ":" -f 2`
   totalMem=`sed -n 2p $freeinfo |awk '{print $2}'`
@@ -551,19 +579,24 @@ fi
   totalSwapUsed=`sed -n 4p $freeinfo |awk '{print $3}'`
   totalSwapFree=`sed -n 4p $freeinfo |awk '{print $4}'`
   diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
+  rm -f $topinfo
+  rm -f $freeinfo
   if [ -s "$plugintmp" ]; then
     plugins=`cat $plugintmp`
   elif [ ! -s "$plugintmp" ]; then
     getPlugins
   fi
   stime=`date`
-  # Check for MineQuery Plugin & Set $players
+  # Check for MineQuery Plugin & Set $playerCount & $players
   if [[ -f "$bukkitdir/plugins/Minequery.jar" ]]; then
-    players=`echo "QUERY" |nc localhost 25566 |grep PLAYERLIST|awk -F"PLAYERLIST" '{print $2}'|sed -e 's/^[ \t]*//'`
+    mineQueryinfo=`mktemp "/tmp/minequeryinfo-$abmid.XXXXXX"`
+    mineQuery=`echo "QUERY" |nc localhost 25566 > $mineQueryinfo`
+    players=`grep PLAYERLIST $mineQueryinfo | grep PLAYERLIST | awk -F"PLAYERLIST" '{print $2}'|sed -e 's/^[ \t]*//'`
+    playerCount=`grep PLAYERCOUNT $mineQueryinfo | grep PLAYERCOUNT|awk -F "PLAYERCOUNT" '{print $2}'`
+    rm -f $mineQueryinfo
   fi
   clear
-  echo -e $txtbld"Ascii Bukkit Menu"$txtrst
-  echo -e $txtbld"Version:"$txtrst $abmversion
+  echo -e $txtbld"Ascii Bukkit Menu:"$txtrst $abmversion
   if [[ -n "$latestabm" ]]; then
     if [[ "$latestabm" > "$abmversion" ]]; then
       echo -e $txtred"Update Availible:" $latestabm $txtrst
@@ -584,6 +617,9 @@ craftbukkit=$bukkitdir/$cbfile
   if [ ! -f $craftbukkit ]; then
     echo -e $txtred"Not Installed"$txtrst
     echo -e $txtred"Choose Option 6 to install"$txtrst
+    echo -e "If this is your first time installing"
+    echo -e "Craftbukkit, then it is recommended"
+    echo -e "you restart ABM after install."
     echo
   fi
 if [[ -z $build ]]; then
@@ -611,6 +647,9 @@ fi
 if [[ $MCPID ]]; then
   echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
   echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
+  if [[ $playerCount ]]; then
+    echo -e $txtbld"Player Count:"$txtrst $playerCount
+  fi
   if [[ $players ]]; then
     echo -e $txtbld"Connected Players:"$txtrst $players
   fi
@@ -627,14 +666,10 @@ if [[ $sarbin ]]; then
 fi
   echo -e $txtbld"Load:"$txtrst $load
   echo -e $txtbld"Time:"$txtrst $stime
-
-  rm -f $topinfo
-  rm -f $freeinfo
-  rm -f $sarinfo
 }
 
 
-# Check for Bukkit Update once a day
+# Check for Bukkit & ABM Update once a day
 checkUpdate () {
   lastup=`cat $abmdir/include/config/update`
   if [[ $lastup -lt `date "+%y%m%d"` ]]; then
@@ -645,3 +680,4 @@ checkUpdate () {
     latestabm=`cat $abmdir/include/temp/latestabm`
   fi
 }
+# The End
