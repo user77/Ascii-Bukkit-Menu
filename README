@@ -16,25 +16,29 @@ Send commands directly to bukkit server.
 Automatically update Bukkit server to latest recommended.
 Bukkit server log rotation. Rotates server.log on each start, keeps last 20 compressed.
 If using Ramdisks, will automatically copy worlds between ramdisk and localdisk. Then runs an md5sum to verify consistency of the data.
+Start and Stop server on boot using non-interactive mode.
 See:
 
+ScreenShot
 
 Download:
 
-http://dev.bukkit.org/server-mods/ascii-bukkit-menu/
-
-Latest Release
+Latest Release 0.2.6
 
 Dependencies:
 
 Java Runtime Enviroment http://java.com/en/download/manual.jsp
 bash http://www.gnu.org/s/bash/
 screen http://www.gnu.org/s/screen/
+-Must have vertical support. (This is baked into debian based systems)
+-Arch users try this package
 grep http://www.gnu.org/s/grep/
 wget http://www.gnu.org/s/wget/
 zip / unzip
 logrotate
 md5sum
+netcat (optional to see connected players if using minequery)
+sysstat utilities (optional to see network usage)
 Install:
 
 NEW Method:
@@ -42,20 +46,23 @@ This will download and install ABM, then run an interactive script to setup the 
 No need to edit config manually.
 Simply copy and paste the following to a bash shell.
 
-wget -O install.sh http://dev.bukkit.org/media/files/552/803/install.sh && chmod +x install.sh && ./install.sh
+wget http://dev.bukkit.org/media/files/580/690/install.sh && chmod +x install.sh && ./install.sh
 alternate method - zip:
 
-wget http://dev.bukkit.org/media/files/552/573/abm-0.1.6.zip
-unzip abm-latest.zip
+wget http://dev.bukkit.org/media/files/580/688/abm-0.2.6.zip
+unzip abm-0.2.5.zip
 cd Ascii-Bukkit-Menu
-vi include/conf
-./start.sh
-nightly builds - github:
+./abm.sh
+Usage:
 
-git clone git://github.com/user77/Ascii-Bukkit-Menu.git
-cd Ascii-Bukkit-Menu
-vi include/conf
-./start.sh
+To use ABM simply change to the directory you installed it to and run the abm.sh script.
+
+cd /opt/craftbukkit/Ascii-Bukkit-Menu
+./abm.sh
+You can also run in non-interactive mode. This can be added to startup scripts. Currently doesn't work if you are using a ramdisk
+
+./abm --start
+./abm --stop
 Help:
 
 First check to see you have the correct dependencies as listed above.
@@ -63,30 +70,11 @@ Make sure your user has +rx permissions to Ascii-Bukkit-Menu directory
 
 chmod -R u+rx Ascii-Bukkit-Menu
 chown -R you:yourgroup Ascii-Bukkit-Menu
-If you come across an issue such as this:
-
-$ Ascii-Bukkit-Menu/start.sh
-Ascii-Bukkit-Menu/start.sh: line 4: include/config: No such file or directory
-You need to run the start.sh script from within the Ascii-Bukkit-Menu.
-
-$ cd Ascii-Bukkit-Menu
-$ ./start.sh
-This is something that should be resolved in the next release.
-
-Come Chat
-/j #abm on EsperNet.net
-
 Issues:
 
-This is very much a work in progress. So if you come across a bug, please open a ticket. 
-http://dev.bukkit.org/server-mods/ascii-bukkit-menu/tickets/
+Dosen't work on screen without vertical support.
 
-THANKS:
-	TnTbass for helping come up with the idea, testing, input, general geekery.
-
-
-
-    Copyright (C) 2011 
+    Copyright (C) 2012 
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
