@@ -534,7 +534,7 @@ if [ $MCPID ]; then
   screen -S bukkit-server -p 0 -X eval 'stuff '"plugins"'\015'
   sleep 2
   plugintmp=`mktemp "/tmp/plugins-$abmid.XXXXXX"`
-  grep "Plugins:" $slog |head -1 |awk '{ $1=""; $2=""; $3=""; $4=""; print $0 }' > $plugintmp
+  grep "Plugins" $slog |head -1 |awk '{ $1=""; $2=""; $3=""; $4=""; print $0 }' > $plugintmp
 fi
 }
 
@@ -636,12 +636,12 @@ fi
 
 if [[ -z $plugins ]]; then
  if [[ $MCPID ]]; then
-    echo -e $txtbld"Plugins:"$txtrst "Loading..." 
+    echo -e $txtbld"Plugins"$txtrst "Loading..." 
   elif [[ -z $MCPID ]]; then
-    echo -e $txtbld"Plugins:"$txtrst 
+    echo -e $txtbld"Plugins"$txtrst 
   fi  
 elif [[ $plugins ]]; then
-  echo -e $txtbld"Plugins:"$txtrst $plugins
+  echo -e $txtbld"Plugins"$txtrst $plugins
 fi
 
 if [[ $MCPID ]]; then
