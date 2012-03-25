@@ -504,8 +504,8 @@ sayCommand () {
   screen -S bukkit-server -p 0 -X eval 'stuff '"\"say $comment\""'\015' 
 }
 
-# Quit Function
-quitFunction () {
+# Function to clean variables.  Warning: Will clean all variables.
+cleanTmp () {
 # Make sure all temp files are removed. Just in case.
   rm -f /tmp/topinfo-$abmid*
   rm -f /tmp/freeinfo-$abmid*
@@ -513,6 +513,12 @@ quitFunction () {
   rm -f /tmp/plugins-$abmid*
   rm -f /tmp/build-$abmid*
   rm -f /tmp/minequeryinfo-$abmid.*
+  rm -f /tmp/done-$abmid.*
+}
+
+# Quit Function
+quitFunction () {
+  cleanTmp
   # Kill Screen
   kill $menuscreenpid
   exit 0
