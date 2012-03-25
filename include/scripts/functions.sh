@@ -540,7 +540,7 @@ getDone () {
 # function to find "Done" time.
 if [[ $MCPID ]]; then
   donetmp=`mktemp "/tmp/done-$abmid.XXXXXX"`
-  grep "Done" $slog | awk '{print $5}' > $donetmp
+  grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' > $donetmp
 fi
 }
 
