@@ -71,7 +71,7 @@ read -p "Bukkit Path: " bukkitdir
 echo
 echo "Please add any Java arguments you would like. Seperated by space."
 echo "For a complete list, please see: http://bit.ly/mYKJte"
-echo "Default: -server -Xincgc -Xmx1g"
+echo "Default: -server -Xincgc -Xmx1G"
 echo
 read -p "Java Arguments: " jargs
 
@@ -140,7 +140,7 @@ clear
   if [[ -z $jargs ]]; then
     echo
     echo "No Java Arguments set, using defaults.."
-    jargs="-server -Xincgc -Xmx1g"
+    jargs="-server -Xincgc -Xmx1G"
     echo $jargs
     sleep 1
   fi
