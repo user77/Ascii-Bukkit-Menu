@@ -483,9 +483,9 @@ stopServer () {
 
 restartServer () {
   stopServer
-if [ -z $MCPID ]; then
-  startServer
-fi
+  if [[ -z $MCPID ]]; then
+    startServer
+  fi
 }
 
 # Send Server Commands
