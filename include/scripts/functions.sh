@@ -59,8 +59,8 @@ echo
 echo "This will guide you through the setup for Ascii Bukkit Menu."
 echo "If you decide not to answer a question, defaults will be used."
 echo 
-echo "Would you like to use the Recommended or Development version"
-echo "of CraftBukkit? [r/d]"
+echo "Would you like to use the Recommended, Beta or Development version"
+echo "of CraftBukkit? [rb/beta/dev]"
 echo
 read -p "Bukkit Branch: " bukkitBranch
 echo
@@ -111,14 +111,16 @@ clear
     echo "No CraftBukkit Branch set. Assuming Recommended."
     bukkitBranch=recommended
   elif [[ $bukkitBranch ]]; then
-    if [[ $bukkitBranch =~ ^(recommended|Recommended|r|R)$ ]]; then
+    if [[ $bukkitBranch =~ ^(recommended|Recommended|r|R|rb|RB|rB|Rb)$ ]]; then
       bukkitBranch=recommended
-    elif [[ $bukkitBranch =~ ^(development|Development|d|D)$ ]]; then
+    elif [[ $bukkitBranch =~ ^(beta|Beta|BETA|b|B)$ ]]; then
+      bukkitBranch=beta
+    elif [[ $bukkitBranch =~ ^(development|Development|dev|Dev|DEV|d|D)$ ]]; then
       bukkitBranch=development
     else
       bukkitBranch=recommended
     fi
-   echo "Craftbukkit Branch set to:" $bukkitBranch
+    echo "Craftbukkit Branch set to:" $bukkitBranch
   fi
 
   if [[ -z $bukkitdir ]]; then
@@ -347,6 +349,9 @@ update () {
           elif [ $bukkitBranch = "development" ]; then 
             bukkiturl="http://cbukk.it/craftbukkit-dev.jar"
             wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit-dev.jar"
+          elif [ $bukkitBranch = "beta" ]; then
+            bukkiturl="http://cbukk.it/craftbukkit-beta.jar"
+            wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit-beta.jar"
           else
             echo "Bukkit Branch not set."
             echo "Please check your ABM Config."
@@ -365,7 +370,6 @@ update () {
           echo -e "Update Aborted"
           sleep 5
         fi
-
 }
 
 # Install MineQuery Plugin. Restart Server.
