@@ -513,6 +513,7 @@ cleanTmp () {
   rm -f /tmp/plugins-$abmid*
   rm -f /tmp/build-$abmid*
   rm -f /tmp/minequeryinfo-$abmid.*
+  rm -f /tmp/done-$abmid.*
 }
 
 # Quit Function
