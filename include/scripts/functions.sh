@@ -553,17 +553,16 @@ fi
 # This is the main info showed in status.sh
 showInfo () {
   checkServer
-  if [ -f $abmdir/include/temp/latestabm ]; then
+  if [[ -f $abmdir/include/temp/latestabm ]]; then
     latestabm=`cat $abmdir/include/temp/latestabm`
-  elif [ ! -f $abmdir/include/temp/latestabm ]; then
+  elif [[ ! -f $abmdir/include/temp/latestabm ]]; then
     wget --quiet -r http://bit.ly/vvizIg -O  $abmdir/include/temp/latestabm
   fi
-
-  if [ -f "$buildtmp" ]; then
+  if [[ -f "$buildtmp" ]]; then
     build=`cat $buildtmp`
-  elif [ ! -f "$buildtmp" ]; then
+  elif [[ ! -f "$buildtmp" ]]; then
     build=
-    if [ $MCPID ]; then
+    if [[ $MCPID ]]; then
       getVersion
     fi
   fi
@@ -572,17 +571,18 @@ showInfo () {
   getTop=`top -n 1 -b > $topinfo`
   freeinfo=`mktemp "/tmp/freeinfo-$abmid.XXXXXX"`
   getFree=`free -m > $freeinfo`
- if [[ $MCPID ]]; then
-  bukkitCpuTop=`grep $MCPID $topinfo |awk -F" " '{print $9}'`
-  bukkitMemTop=`grep $MCPID $topinfo |awk -F" " '{print $10}'`
- fi
-if [[ $sarbin ]]; then
-  sarinfo=`mktemp "/tmp/sarinfo-$abmid.XXXXXX"`
-  getSar=`sar -n DEV 1 1 |grep $eth |grep -v "Average:"|grep -v lo|awk '{print $5,$6}' > $sarinfo`
-  netrx=`awk {'print $1'} $sarinfo`
-  nettx=`awk {'print $2'} $sarinfo`
-  rm -f $sarinfo
-fi
+  if [[ $MCPID ]]; then
+    bukkitCpuTop=`grep $MCPID $topinfo |awk -F" " '{print $9}'`
+    bukkitMemTop=`grep $MCPID $topinfo |awk -F" " '{print $10}'`
+  fi
+  # Get information from SAR
+  if [[ $sarbin ]]; then
+    sarinfo=`mktemp "/tmp/sarinfo-$abmid.XXXXXX"`
+    getSar=`sar -n DEV 1 1 |grep $eth |grep -v "Average:"|grep -v lo|awk '{print $5,$6}' > $sarinfo`
+    netrx=`awk {'print $1'} $sarinfo`
+    nettx=`awk {'print $2'} $sarinfo`
+    rm -f $sarinfo
+  fi
   totalCpuTop=`grep Cpu $topinfo | cut -d ":" -f 2`
   totalMem=`sed -n 2p $freeinfo |awk '{print $2}'`
   totalMemUsed=`sed -n 2p $freeinfo |awk '{print $3}'`
@@ -616,16 +616,14 @@ fi
   fi
   echo
   echo -e $txtbld"Bukkit Server Info"$txtrst
-  
   if [[ $MCPID ]]; then
     uptime=`ps -p $MCPID -o stime|grep -v STIME`
     echo -e $txtgrn"Running$txtrst Since: "$uptime
   fi
-  
   if [[ -z $MCPID ]]; then
     echo -e $txtred"Not Running" $txtrst
   fi
-craftbukkit=$bukkitdir/$cbfile
+  craftbukkit=$bukkitdir/$cbfile
   if [ ! -f $craftbukkit ]; then
     echo -e $txtred"Not Installed"$txtrst
     echo -e $txtred"Choose Option 6 to install"$txtrst
@@ -634,38 +632,35 @@ craftbukkit=$bukkitdir/$cbfile
     echo -e "you restart ABM after install."
     echo
   fi
-if [[ -z $build ]]; then
-  if [[ $MCPID ]]; then
-    echo -e $txtbld"Build:"$txtrst "Loading..."
-  elif [[ -z $MCPID ]]; then
-    echo -e $txtbld"Build:"$txtrst
+  if [[ -z $build ]]; then
+    if [[ $MCPID ]]; then
+      echo -e $txtbld"Build:"$txtrst "Loading..."
+    elif [[ -z $MCPID ]]; then
+      echo -e $txtbld"Build:"$txtrst
+    fi
+  elif [[ $build ]]; then
+    echo -e $txtbld"Build:"$txtrst $build
   fi
-elif [[ $build ]]; then
-  echo -e $txtbld"Build:"$txtrst $build
-fi
-
   echo -e $txtbld"Java Flags:"$txtrst $jargs
-
-if [[ -z $plugins ]]; then
- if [[ $MCPID ]]; then
-    echo -e $txtbld"Plugins"$txtrst "Loading..." 
-  elif [[ -z $MCPID ]]; then
-    echo -e $txtbld"Plugins"$txtrst 
-  fi  
-elif [[ $plugins ]]; then
-  echo -e $txtbld"Plugins"$txtrst $plugins
-fi
-
-if [[ $MCPID ]]; then
-  echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
-  echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
-  if [[ $playerCount ]]; then
-    echo -e $txtbld"Player Count:"$txtrst $playerCount
+  if [[ -z $plugins ]]; then
+    if [[ $MCPID ]]; then
+      echo -e $txtbld"Plugins"$txtrst "Loading..."
+    elif [[ -z $MCPID ]]; then
+      echo -e $txtbld"Plugins"$txtrst
+    fi
+  elif [[ $plugins ]]; then
+    echo -e $txtbld"Plugins"$txtrst $plugins
   fi
-  if [[ $players ]]; then
-    echo -e $txtbld"Connected Players:"$txtrst $players
+  if [[ $MCPID ]]; then
+    echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
+    echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
+    if [[ $playerCount ]]; then
+      echo -e $txtbld"Player Count:"$txtrst $playerCount
+    fi
+    if [[ $players ]]; then
+      echo -e $txtbld"Connected Players:"$txtrst $players
+    fi
   fi
-fi
   echo
   echo -e $txtbld"System Info"$txtrst
   echo -e $txtbld"Hostname:"$txtrst $hostname
@@ -673,9 +668,9 @@ fi
   echo -e $txtbld"Mem Usage:"$txtrst "Total: "$totalMem"MB" "Used: "$totalMemUsed"MB"  "Free: "$totalMemFree"MB"
   echo -e $txtbld"Swap Usage:"$txtrst "Total: "$totalSwap"MB" "Used: "$totalSwapUsed"MB"  "Free: "$totalSwapFree"MB"
   echo -e $txtbld"Disk Usage:"$txtrst $diskuse
-if [[ $sarbin ]]; then
-  echo -e $txtbld"Network:"$txtrst RX: $netrx"kB/s" "|" TX: $nettx"kB/s"
-fi
+  if [[ $sarbin ]]; then
+    echo -e $txtbld"Network:"$txtrst RX: $netrx"kB/s" "|" TX: $nettx"kB/s"
+  fi
   echo -e $txtbld"Load:"$txtrst $load
   echo -e $txtbld"Time:"$txtrst $stime
 }
