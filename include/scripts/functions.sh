@@ -341,6 +341,7 @@ checkServer () {
 update () {
         stopServer
         if [[ ! $MCPID ]]; then
+          rm $bukkitdir/craftbukkit*.jar
           if [ $bukkitBranch = "recommended" ]; then
             bukkiturl="http://cbukk.it/craftbukkit.jar"
             wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit.jar"
