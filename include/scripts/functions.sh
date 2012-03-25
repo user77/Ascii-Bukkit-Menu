@@ -521,8 +521,6 @@ quitFunction () {
 # Get Craftbukkit Version Info
 getVersion () {
 if [ $MCPID ]; then
-  screen -S bukkit-server -p 0 -X eval 'stuff '"version"'\015'
-  sleep 2
   buildtmp=`mktemp "/tmp/build-$abmid.XXXXXX"`
   grep "This server is running CraftBukkit" $slog |tail -1 | awk '{print $10, $11, $12}' > $buildtmp
 fi
