@@ -536,6 +536,14 @@ if [ $MCPID ]; then
 fi
 }
 
+getDone () {
+# function to find "Done" time.
+if [[ $MCPID ]]; then
+  donetmp=`mktemp "/tmp/done-$abmid.XXXXXX"`
+  grep "Done" $slog | awk '{print $5}' > $donetmp
+fi
+}
+
 # This is the main info showed in status.sh
 showInfo () {
   checkServer
