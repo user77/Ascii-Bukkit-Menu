@@ -44,7 +44,7 @@ fi
 
 source $abmconfig
 
-# If Config has not beed edited, then exit.
+# If Config has not been edited, then exit.
 if [[ -z $bukkitdir ]]; then
 	echo "ABM configuration incomplete or missing."
         read -p "Would you like to create one now? [y/n]: " answer
