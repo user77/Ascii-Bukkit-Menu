@@ -50,7 +50,7 @@ wget http://dev.bukkit.org/media/files/580/690/install.sh && chmod +x install.sh
 alternate method - zip:
 
 wget http://dev.bukkit.org/media/files/580/688/abm-0.2.6.zip
-unzip abm-0.2.5.zip
+unzip abm-0.2.6.zip
 cd Ascii-Bukkit-Menu
 ./abm.sh
 Usage:
