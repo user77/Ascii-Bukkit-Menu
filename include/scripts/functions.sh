@@ -598,9 +598,9 @@ showInfo () {
   diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
   rm -f $topinfo
   rm -f $freeinfo
-  if [ -s "$plugintmp" ]; then
+  if [[ -s "$plugintmp" ]]; then
     plugins=`cat $plugintmp`
-  elif [ ! -s "$plugintmp" ]; then
+  elif [[ ! -s "$plugintmp" ]]; then
     getPlugins
   fi
   stime=`date`
