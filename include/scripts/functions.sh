@@ -623,7 +623,11 @@ showInfo () {
   echo -e $txtbld"Bukkit Server Info"$txtrst
   if [[ $MCPID ]]; then
     uptime=`ps -p $MCPID -o stime|grep -v STIME`
-    echo -e $txtgrn"Running$txtrst Since: "$uptime
+    if [[ $doneTime ]]; then
+      echo -e $txtgrn"Running$txtrst Since: "$uptime", Started in: "$doneTime
+    else
+      echo -e $txtgrn"Running$txtrst Since: "$uptime", Started in: Umm... where did that go? One sec..."
+    fi
   fi
   if [[ -z $MCPID ]]; then
     echo -e $txtred"Not Running" $txtrst
