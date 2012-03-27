@@ -534,25 +534,32 @@ getVersion () {
 if [[ $MCPID ]]; then
   buildtmp=`mktemp "/tmp/build-$abmid.XXXXXX"`
   grep "This server is running CraftBukkit" $slog |tail -1 | awk '{print $10, $11, $12}' > $buildtmp
+  build=`cat $buildtmp`
 fi
 }
 
 # Get Plugin Info
 getPlugins () {
-if [ $MCPID ]; then  
-  screen -S bukkit-server -p 0 -X eval 'stuff '"plugins"'\015'
-  sleep 2
   plugintmp=`mktemp "/tmp/plugins-$abmid.XXXXXX"`
   grep "Plugins" $slog |head -1 |awk '{ $1=""; $2=""; $3=""; $4=""; print $0 }' > $plugintmp
-fi
+  plugins=`cat $plugintmp`
+  if [[ -z $plugins ]]; then
+    screen -S bukkit-server -p 0 -X eval 'stuff '"plugins"'\015'
+    grep "Plugins" $slog |head -1 |awk '{ $1=""; $2=""; $3=""; $4=""; print $0 }' > $plugintmp
+    plugins=`cat $plugintmp`
+    while [[ -z $plugins ]]; do
+      sleep 1
+      grep "Plugins" $slog |head -1 |awk '{ $1=""; $2=""; $3=""; $4=""; print $0 }' > $plugintmp
+      plugins=`cat $plugintmp`
+    done
+  fi
 }
 
-getDone () {
 # function to find "Done" time.
-if [[ $MCPID ]]; then
+getDone () {
   donetmp=`mktemp "/tmp/done-$abmid.XXXXXX"`
   grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' > $donetmp
-fi
+  doneTime=`cat $donetmp`
 }
 
 # This is the main info showed in status.sh
@@ -562,14 +569,6 @@ showInfo () {
     latestabm=`cat $abmdir/include/temp/latestabm`
   elif [[ ! -f $abmdir/include/temp/latestabm ]]; then
     wget --quiet -r http://bit.ly/vvizIg -O  $abmdir/include/temp/latestabm
-  fi
-  if [[ -f "$buildtmp" ]]; then
-    build=`cat $buildtmp`
-  elif [[ ! -f "$buildtmp" ]]; then
-    build=
-    if [[ $MCPID ]]; then
-      getVersion
-    fi
   fi
   load=`uptime|awk -F"average:" '{print $2}'` # Cut everthing after "average:"
   topinfo=`mktemp "/tmp/topinfo-$abmid.XXXXXX"`
@@ -598,11 +597,6 @@ showInfo () {
   diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
   rm -f $topinfo
   rm -f $freeinfo
-  if [[ -s "$plugintmp" ]]; then
-    plugins=`cat $plugintmp`
-  elif [[ ! -s "$plugintmp" ]]; then
-    getPlugins
-  fi
   stime=`date`
   # Check for MineQuery Plugin & Set $playerCount & $players
   if [[ -f "$bukkitdir/plugins/Minequery.jar" ]]; then
@@ -637,34 +631,28 @@ showInfo () {
     echo -e "you restart ABM after install."
     echo
   fi
-  if [[ -z $build ]]; then
-    if [[ $MCPID ]]; then
+  if [[ $MCPID ]]; then
+    if [[ -z $doneTime ]]; then
+      getDone
+    else
+      getVersion
+      getPlugins
+    fi
+    if [[ -z $build ]]; then
       echo -e $txtbld"Build:"$txtrst "Loading..."
-    elif [[ -z $MCPID ]]; then
-      echo -e $txtbld"Build:"$txtrst
+    elif [[ $build ]]; then
+      echo -e $txtbld"Build:"$txtrst $build
     fi
-  elif [[ $build ]]; then
-    echo -e $txtbld"Build:"$txtrst $build
-  fi
-  echo -e $txtbld"Java Flags:"$txtrst $jargs
-  if [[ -z $plugins ]]; then
-    if [[ $MCPID ]]; then
+    if [[ -z $plugins ]]; then
       echo -e $txtbld"Plugins"$txtrst "Loading..."
-    elif [[ -z $MCPID ]]; then
-      echo -e $txtbld"Plugins"$txtrst
+    elif [[ $plugins ]]; then
+      echo -e $txtbld"Plugins"$txtrst $plugins
     fi
-  elif [[ $plugins ]]; then
-    echo -e $txtbld"Plugins"$txtrst $plugins
   fi
   if [[ $MCPID ]]; then
     echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
     echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
-    if [[ $playerCount ]]; then
-      echo -e $txtbld"Player Count:"$txtrst $playerCount
-    fi
-    if [[ $players ]]; then
-      echo -e $txtbld"Connected Players:"$txtrst $players
-    fi
+    echo -e $txtbld"Connected Players:"$txtrst $playerCount $players
   fi
   echo
   echo -e $txtbld"System Info"$txtrst
