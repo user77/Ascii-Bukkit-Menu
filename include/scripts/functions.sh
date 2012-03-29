@@ -336,7 +336,7 @@ fi
 
 # Find PID of Bukkit Server.
 checkServer () {
-        MCPID=`ps -ef |grep -i craftbukkit* |grep -v grep |awk '{ print $2 }'`
+  MCPID=`ps -ef |grep -i craftbukkit* |grep -v grep |awk '{ print $2 }'`
 }
 
 # Update Bukkit to Latest.
