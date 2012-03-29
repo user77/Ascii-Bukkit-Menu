@@ -343,13 +343,13 @@ update () {
   stopServer
   if [[ ! $MCPID ]]; then
     rm $bukkitdir/craftbukkit*.jar
-    if [ $bukkitBranch = "recommended" ]; then
+    if [[ $bukkitBranch = "recommended" ]]; then
       bukkiturl="http://cbukk.it/craftbukkit.jar"
       wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit.jar"
-    elif [ $bukkitBranch = "development" ]; then
+    elif [[ $bukkitBranch = "development" ]]; then
       bukkiturl="http://cbukk.it/craftbukkit-dev.jar"
       wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit-dev.jar"
-    elif [ $bukkitBranch = "beta" ]; then
+    elif [[ $bukkitBranch = "beta" ]]; then
       bukkiturl="http://cbukk.it/craftbukkit-beta.jar"
       wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit-beta.jar"
     else
@@ -360,7 +360,7 @@ update () {
     rm -f /tmp/plugins-$abmid*
     rm -f /tmp/build-$abmid*
     clear
-    if [ $craftbukkit ]; then
+    if [[ $craftbukkit ]]; then
       echo $txtgrn"Update Successful!"$txtrst
       sleep 2
     fi
@@ -371,6 +371,7 @@ update () {
       sleep 5
     fi
 }
+
 
 
 # Install MineQuery Plugin. Restart Server.
