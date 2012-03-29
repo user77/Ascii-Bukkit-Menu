@@ -364,26 +364,27 @@ update () {
       echo $txtgrn"Update Successful!"$txtrst
       sleep 2
     fi
-      startServer
-    elif [[ $MCPID ]]; then
-      echo -e "Craftbukkit Server Running"
-      echo -e "Update Aborted"
-      sleep 5
-    fi
+    startServer
+  elif [[ $MCPID ]]; then
+    echo -e "Craftbukkit Server Running"
+    echo -e "Update Aborted"
+    sleep 5
+  fi
 }
 
 
 
 # Install MineQuery Plugin. Restart Server.
 installmq () {
-        clear
-        wget -m -nd --progress=dot:mega -P $abmdir/include/temp/ https://github.com/downloads/vexsoftware/minequery/Minequery-1.5.zip
-        unzip -o $abmdir/include/temp/Minequery-1.5.zip -d $bukkitdir/plugins
-        rm $abmdir/include/temp/Minequery-1.5.zip
-        clear
-        stopServer
-        startServer
+  clear
+  wget -m -nd --progress=dot:mega -P $abmdir/include/temp/ https://github.com/downloads/vexsoftware/minequery/Minequery-1.5.zip
+  unzip -o $abmdir/include/temp/Minequery-1.5.zip -d $bukkitdir/plugins
+  rm $abmdir/include/temp/Minequery-1.5.zip
+  clear
+  stopServer
+  startServer
 }
+
 
 # Start Bukkit Server
 startServer () {
