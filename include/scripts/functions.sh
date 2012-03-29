@@ -341,37 +341,38 @@ checkServer () {
 
 # Update Bukkit to Latest.
 update () {
-        stopServer
-        if [[ ! $MCPID ]]; then
-          rm $bukkitdir/craftbukkit*.jar
-          if [ $bukkitBranch = "recommended" ]; then
-            bukkiturl="http://cbukk.it/craftbukkit.jar"
-            wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit.jar"
-          elif [ $bukkitBranch = "development" ]; then 
-            bukkiturl="http://cbukk.it/craftbukkit-dev.jar"
-            wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit-dev.jar"
-          elif [ $bukkitBranch = "beta" ]; then
-            bukkiturl="http://cbukk.it/craftbukkit-beta.jar"
-            wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit-beta.jar"
-          else
-            echo "Bukkit Branch not set."
-            echo "Please check your ABM Config."
-          fi
-          cat /dev/null > $slog
-          rm -f /tmp/plugins-$abmid*
-          rm -f /tmp/build-$abmid*
-	        clear
-            if [ $craftbukkit ]; then
-              echo $txtgrn"Update Successful!"$txtrst
-              sleep 2
-            fi
-          startServer
-        elif [[ $MCPID ]]; then
-          echo -e "Craftbukkit Server Running"
-          echo -e "Update Aborted"
-          sleep 5
-        fi
+  stopServer
+  if [[ ! $MCPID ]]; then
+    rm $bukkitdir/craftbukkit*.jar
+    if [ $bukkitBranch = "recommended" ]; then
+      bukkiturl="http://cbukk.it/craftbukkit.jar"
+      wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit.jar"
+    elif [ $bukkitBranch = "development" ]; then
+      bukkiturl="http://cbukk.it/craftbukkit-dev.jar"
+      wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit-dev.jar"
+    elif [ $bukkitBranch = "beta" ]; then
+      bukkiturl="http://cbukk.it/craftbukkit-beta.jar"
+      wget --progress=dot:mega $bukkiturl -O "$bukkitdir/craftbukkit-beta.jar"
+    else
+      echo "Bukkit Branch not set."
+      echo "Please check your ABM Config."
+    fi
+    cat /dev/null > $slog
+    rm -f /tmp/plugins-$abmid*
+    rm -f /tmp/build-$abmid*
+    clear
+    if [ $craftbukkit ]; then
+      echo $txtgrn"Update Successful!"$txtrst
+      sleep 2
+    fi
+      startServer
+    elif [[ $MCPID ]]; then
+      echo -e "Craftbukkit Server Running"
+      echo -e "Update Aborted"
+      sleep 5
+    fi
 }
+
 
 # Install MineQuery Plugin. Restart Server.
 installmq () {
