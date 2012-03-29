@@ -650,7 +650,7 @@ showInfo () {
     echo -e $txtred"Not Running" $txtrst
   fi
   craftbukkit=$bukkitdir/$cbfile
-  if [[ ! -f $craftbukkit ]]; then
+  if [ ! -f $craftbukkit ]; then
     echo -e $txtred"Not Installed"$txtrst
     echo -e $txtred"Choose Option 6 to install"$txtrst
     echo -e "If this is your first time installing"
