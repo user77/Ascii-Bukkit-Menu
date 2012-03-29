@@ -432,57 +432,57 @@ startServer () {
 
 # Stop Bukkit Server
 stopServer () {
-        clear
-        checkServer
-        if [[ -z $MCPID ]]; then
-                clear
-                echo "Bukkit Not Running.."
-                sleep 1
-        else
-		if [[ $silent != "--stop" ]]; then
-		  read -p "Confirm Shutdown. [Y/N] " answer
-		fi
-		if [[ $silent = "--stop" ]]; then
-		  answer=y
-		fi
-		if [[ $answer =~ ^(yes|y|Y)$ ]]; then
+  clear
+  checkServer
+  if [[ -z $MCPID ]]; then
+    clear
+    echo "Bukkit Not Running.."
+    sleep 1
+  else
+    if [[ $silent != "--stop" ]]; then
+      read -p "Confirm Shutdown. [Y/N] " answer
+    fi
+    if [[ $silent = "--stop" ]]; then
+      answer=y
+    fi
+    if [[ $answer =~ ^(yes|y|Y)$ ]]; then
       screen -S bukkit-server -p 0 -X eval 'stuff "save-all"\015'
       screen -S bukkit-server -p 0 -X eval 'stuff "stop"\015'
-        while [[ $MCPID ]]; do
-          echo "Bukkit Shutdown in Progress.."
-          checkServer
-          clear
-        done
-          if [ $ramdisk = true ]; then
-            read -p "Would you like copy from ram disk to local disk? [Y/N] " answer
-              if [[ $answer =~ ^(yes|y|Y)$ ]]; then
-                for x in ${worlds[*]}
-                  do
-                    cp -rfv "$bukkitdir/$x/"* "$bukkitdir/$x-offline/"  >>  "$bukkitdir/server.log"
-                    find "$bukkitdir/$x" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$abmdir/include/temp/$x.md5"
-                    find "$bukkitdir/$x-offline" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$abmdir/include/temp/$x-offline.md5"
-                    md5=`diff "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"`
-                      if [ -n "$md5" ]; then
-                        echo $txtred "#### Warning! #### Warning! ####" $txtrst
-                        echo "MD5 Check Failed for $x"
-                        echo "Please investigate."
-                        read -p "Hit any key to continue..."
-                        clear
-                      elif [ -z "$md5" ]; then
-                        clear
-                        echo $txtgrn "Copied $x from ram disk to local disk sucessully!" $txtrst
-                        sleep 2
-                        clear
-                      fi
-                    rm -f "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"
-                  done
-              fi
-          fi
-        screen -S bukkit-server -X quit
-        rm -f /tmp/plugins-$abmid*
-        rm -f /tmp/build-$abmid*
-		      fi
+      while [[ $MCPID ]]; do
+        echo "Bukkit Shutdown in Progress.."
+        checkServer
+        clear
+      done
+      if [[ $ramdisk = true ]]; then
+        read -p "Would you like copy from ram disk to local disk? [Y/N] " answer
+        if [[ $answer =~ ^(yes|y|Y)$ ]]; then
+          for x in ${worlds[*]}
+          do
+            cp -rfv "$bukkitdir/$x/"* "$bukkitdir/$x-offline/"  >>  "$bukkitdir/server.log"
+            find "$bukkitdir/$x" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$abmdir/include/temp/$x.md5"
+            find "$bukkitdir/$x-offline" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$abmdir/include/temp/$x-offline.md5"
+            md5=`diff "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"`
+            if [[ -n "$md5" ]]; then
+              echo $txtred "#### Warning! #### Warning! ####" $txtrst
+              echo "MD5 Check Failed for $x"
+              echo "Please investigate."
+              read -p "Hit any key to continue..."
+              clear
+            elif [[ -z "$md5" ]]; then
+              clear
+              echo $txtgrn "Copied $x from ram disk to local disk sucessully!" $txtrst
+              sleep 2
+              clear
+            fi
+            rm -f "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"
+          done
         fi
+      fi
+      screen -S bukkit-server -X quit
+      rm -f /tmp/plugins-$abmid*
+      rm -f /tmp/build-$abmid*
+    fi
+  fi
 }
 
 restartServer () {
