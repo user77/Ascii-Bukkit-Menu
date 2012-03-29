@@ -32,7 +32,7 @@ javaCheck () {
 
 #Create directory for logs to go in.
 createLogsdir () {
-  if [ ! -d "$logs" ]; then
+  if [[ ! -d "$logs" ]]; then
     mkdir $logs 2>/dev/null
   fi
 }
