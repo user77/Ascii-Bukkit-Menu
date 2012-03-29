@@ -388,50 +388,47 @@ installmq () {
 
 # Start Bukkit Server
 startServer () {
-        clear
-        checkServer
-        # Need to recheck for screen PID for bukket-server session. In case it has been stopped.
-        serverscreenpid=`screen -ls |grep bukkit-server |cut -f 1 -d .`
-        if [[ -z $MCPID ]]; then
-                logrotate -f -s $abmdir/include/temp/rotate.state $abmdir/include/config/rotate.conf
-                rm $abmdir/include/temp/rotate.state
-                cd $bukkitdir
-                if [[ -z $serverscreenpid ]]; then
-                        screen -d -m -S bukkit-server
-                fi
-                #if using ramdisk copy from local to ramdisk.
-                if [ $ramdisk = true ]; then
-                  read -p "Would you like copy from local disk to ram disk? [Y/N] " answer
-                    if [[ $answer =~ ^(yes|y)$ ]]; then
-                        for x in ${worlds[*]}
-                        do
-                        [ "$(ls -A $bukkitdir/$x-offline/)" ] && cp -rfv "$bukkitdir/$x-offline/"* "$bukkitdir/$x/" >>  "$bukkitdir/server.log" || echo "Nothing to Copy..."
-                        find "$bukkitdir/$x" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn  > "$abmdir/include/temp/$x.md5"
-                        find "$bukkitdir/$x-offline" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$abmdir/include/temp/$x-offline.md5"
-                        md5=`diff "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"`
-                        sleep 5
-                          if [ -n "$md5" ]; then
-                            echo $txtred "#### Warning! #### Warning! ####" $txtrst >> $slog
-                            echo "MD5 Check Failed for $x" >> $slog
-                            echo "Please investigate." >> $slog
-                            elif [ -z "$md5" ]; then
-                              echo $txtgrn "Copied $x from local disk to ram disk sucessully!" $txtrst >> $slog
-                          fi
-                        rm -f "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"
-                        done
-                    fi
-                fi
-                # Start craftbukkit on existing screen session.
-                screen -S bukkit-server -p 0 -X exec java $jargs -jar $bukkitdir/$cbfile nogui
-                cd -
-
-        elif [[ $MCPID ]]; then
-                        echo -e "Server Already Running.."
-                        sleep 1
-        fi
-
+  clear
+  checkServer
+  # Need to recheck for screen PID for bukket-server session. In case it has been stopped.
+  serverscreenpid=`screen -ls |grep bukkit-server |cut -f 1 -d .`
+  if [[ -z $MCPID ]]; then
+    logrotate -f -s $abmdir/include/temp/rotate.state $abmdir/include/config/rotate.conf
+    rm $abmdir/include/temp/rotate.state
+    cd $bukkitdir
+    if [[ -z $serverscreenpid ]]; then
+      screen -d -m -S bukkit-server
+    fi
+    #if using ramdisk copy from local to ramdisk.
+    if [[ $ramdisk = true ]]; then
+      read -p "Would you like copy from local disk to ram disk? [Y/N] " answer
+      if [[ $answer =~ ^(yes|y)$ ]]; then
+        for x in ${worlds[*]}
+        do
+          [ "$(ls -A $bukkitdir/$x-offline/)" ] && cp -rfv "$bukkitdir/$x-offline/"* "$bukkitdir/$x/" >>  "$bukkitdir/server.log" || echo "Nothing to Copy..."
+          find "$bukkitdir/$x" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn  > "$abmdir/include/temp/$x.md5"
+          find "$bukkitdir/$x-offline" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$abmdir/include/temp/$x-offline.md5"
+          md5=`diff "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"`
+          sleep 5
+          if [[ -n "$md5" ]]; then
+            echo $txtred "#### Warning! #### Warning! ####" $txtrst >> $slog
+            echo "MD5 Check Failed for $x" >> $slog
+            echo "Please investigate." >> $slog
+          elif [[ -z "$md5" ]]; then
+            echo $txtgrn "Copied $x from local disk to ram disk sucessully!" $txtrst >> $slog
+          fi
+          rm -f "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"
+        done
+      fi
+    fi
+    # Start craftbukkit on existing screen session.
+    screen -S bukkit-server -p 0 -X exec java $jargs -jar $bukkitdir/$cbfile nogui
+    cd -
+  elif [[ $MCPID ]]; then
+    echo -e "Server Already Running.."
+      sleep 1
+  fi
 }
-
 
 # Stop Bukkit Server
 stopServer () {
