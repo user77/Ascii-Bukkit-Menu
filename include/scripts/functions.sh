@@ -82,6 +82,21 @@ echo
 read -p "Refresh: " tick
 
 echo
+echo "ABM can automatically notify players of an impending shutdown."
+echo "Would you like to create a custom shutdown message?"
+read -p "[y/n] " notify
+echo
+  if [[ $notify =~ ^(yes|y|Y) ]]; then
+    echo "Please enter a message that will be displayed to players upon shutdown."
+    echo "Enter your message and hit enter to complete."
+    echo "You can edit this later in "$abmconfig
+    read -p "Shutdown Message: " shutdownNotify
+    echo
+    echo "You decided upon:"
+    echo $shutdownNotify
+  fi
+
+echo
 echo "Are you using a ramdisk?" 
 echo "See http://bit.ly/smK9iR for more info."
 echo 
@@ -204,12 +219,15 @@ echo "Display Refresh: "$tick
 echo "RamDisk Used: "$ramdisk
 echo "RamDisk Worlds: " $worlds
 echo "Interface:" $eth
+if [[ $shutdownNotify ]]; then
+  echo "Shutdown Message:" $shutdownNotify
+fi
 echo
 read -p "Use this Config? [y/n] " answer
  case $answer in
  [yY] | [yY][eE][Ss] )
 cat > "$abmdir/include/config/abm.conf" <<EOF
-abmversion=0.2.6
+abmversion=0.2.7
 
 bukkitBranch=$bukkitBranch
 
@@ -232,6 +250,9 @@ worlds=( $worlds )
 
 #NIC To use for SAR
 eth=$eth
+
+#Custom Shutdown Message
+shutdownNotify="$shutdownNotify"
 EOF
 clear
 echo "$abmconfig written successfully"
@@ -478,6 +499,9 @@ stopServer () {
           done
         fi
       fi
+      if [[ $shutdownNotify ]]; then
+        screen -S bukkit-server -p 0 -X eval 'stuff '"\"say $shutdownNotify\""'\015'
+      fi
       screen -S bukkit-server -X quit
       rm -f /tmp/plugins-$abmid*
       rm -f /tmp/build-$abmid*
@@ -569,7 +593,7 @@ showInfo () {
   elif [[ ! -f $abmdir/include/temp/latestabm ]]; then
     wget --quiet -r http://bit.ly/vvizIg -O  $abmdir/include/temp/latestabm
   fi
-  load=`uptime|awk -F"average:" '{print $2}'` # Cut everthing after "average:"
+  load=`uptime|awk -F"average: " '{print $2}'` # Cut everthing after "average:"
   topinfo=`mktemp "/tmp/topinfo-$abmid.XXXXXX"`
   getTop=`top -n 1 -b > $topinfo`
   freeinfo=`mktemp "/tmp/freeinfo-$abmid.XXXXXX"`
