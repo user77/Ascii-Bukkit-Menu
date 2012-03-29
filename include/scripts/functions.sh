@@ -32,10 +32,9 @@ javaCheck () {
 
 #Create directory for logs to go in.
 createLogsdir () {
-
-        if [ ! -d "$logs" ]; then
-          mkdir $logs 2>/dev/null
-        fi
+  if [ ! -d "$logs" ]; then
+    mkdir $logs 2>/dev/null
+  fi
 }
 
 # Create LogRoatate Config. New one everytime in case abm.conf has changed.
