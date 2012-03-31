@@ -467,6 +467,9 @@ stopServer () {
       answer=y
     fi
     if [[ $answer =~ ^(yes|y|Y)$ ]]; then
+      if [[ $shutdownNotify ]]; then
+        screen -S bukkit-server -p 0 -X eval 'stuff '"\"say $shutdownNotify\""'\015'
+      fi
       screen -S bukkit-server -p 0 -X eval 'stuff "save-all"\015'
       screen -S bukkit-server -p 0 -X eval 'stuff "stop"\015'
       while [[ $MCPID ]]; do
@@ -498,9 +501,6 @@ stopServer () {
             rm -f "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"
           done
         fi
-      fi
-      if [[ $shutdownNotify ]]; then
-        screen -S bukkit-server -p 0 -X eval 'stuff '"\"say $shutdownNotify\""'\015'
       fi
       screen -S bukkit-server -X quit
       rm -f /tmp/plugins-$abmid*
