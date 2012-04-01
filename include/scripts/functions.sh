@@ -565,8 +565,10 @@ fi
 
 # Get Plugin Info
 getPlugins () {
-  plugintmp=`mktemp "/tmp/plugins-$abmid.XXXXXX"`
-  grep "Plugins" $slog |head -1 |awk '{ $1=""; $2=""; $3=""; $4=""; print $0 }' > $plugintmp
+  if [[ ! -f $plugintmp ]]; then
+    plugintmp=`mktemp "/tmp/plugins-$abmid.XXXXXX"`
+    grep "Plugins" $slog |head -1 |awk '{ $1=""; $2=""; $3=""; $4=""; print $0 }' > $plugintmp
+  fi
   plugins=`cat $plugintmp`
   if [[ -z $plugins ]]; then
     screen -S bukkit-server -p 0 -X eval 'stuff '"plugins"'\015'
@@ -582,8 +584,10 @@ getPlugins () {
 
 # function to find "Done" time.
 getDone () {
-  donetmp=`mktemp "/tmp/done-$abmid.XXXXXX"`
-  grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' > $donetmp
+  if [[ ! -f $donetmp ]]; then
+    donetmp=`mktemp "/tmp/done-$abmid.XXXXXX"`
+    grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' > $donetmp
+  fi
   doneTime=`cat $donetmp`
 }
 
