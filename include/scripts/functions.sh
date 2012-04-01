@@ -467,6 +467,9 @@ stopServer () {
       answer=y
     fi
     if [[ $answer =~ ^(yes|y|Y)$ ]]; then
+      if [[ $shutdownNotify ]]; then
+        screen -S bukkit-server -p 0 -X eval 'stuff '"\"say $shutdownNotify\""'\015'
+      fi
       screen -S bukkit-server -p 0 -X eval 'stuff "save-all"\015'
       screen -S bukkit-server -p 0 -X eval 'stuff "stop"\015'
       while [[ $MCPID ]]; do
@@ -498,9 +501,6 @@ stopServer () {
             rm -f "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"
           done
         fi
-      fi
-      if [[ $shutdownNotify ]]; then
-        screen -S bukkit-server -p 0 -X eval 'stuff '"\"say $shutdownNotify\""'\015'
       fi
       screen -S bukkit-server -X quit
       rm -f /tmp/plugins-$abmid*
@@ -555,16 +555,20 @@ quitFunction () {
 # Get Craftbukkit Version Info
 getVersion () {
 if [[ $MCPID ]]; then
-  buildtmp=`mktemp "/tmp/build-$abmid.XXXXXX"`
-  grep "This server is running CraftBukkit" $slog |tail -1 | awk '{print $10, $11, $12}' > $buildtmp
+  if [[ ! -f $buildtmp ]]; then
+    buildtmp=`mktemp "/tmp/build-$abmid.XXXXXX"`
+    grep "This server is running CraftBukkit" $slog |tail -1 | awk '{print $10, $11, $12}' > $buildtmp
+  fi
   build=`cat $buildtmp`
 fi
 }
 
 # Get Plugin Info
 getPlugins () {
-  plugintmp=`mktemp "/tmp/plugins-$abmid.XXXXXX"`
-  grep "Plugins" $slog |head -1 |awk '{ $1=""; $2=""; $3=""; $4=""; print $0 }' > $plugintmp
+  if [[ ! -f $plugintmp ]]; then
+    plugintmp=`mktemp "/tmp/plugins-$abmid.XXXXXX"`
+    grep "Plugins" $slog |head -1 |awk '{ $1=""; $2=""; $3=""; $4=""; print $0 }' > $plugintmp
+  fi
   plugins=`cat $plugintmp`
   if [[ -z $plugins ]]; then
     screen -S bukkit-server -p 0 -X eval 'stuff '"plugins"'\015'
@@ -580,8 +584,10 @@ getPlugins () {
 
 # function to find "Done" time.
 getDone () {
-  donetmp=`mktemp "/tmp/done-$abmid.XXXXXX"`
-  grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' > $donetmp
+  if [[ ! -f $donetmp ]]; then
+    donetmp=`mktemp "/tmp/done-$abmid.XXXXXX"`
+    grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' > $donetmp
+  fi
   doneTime=`cat $donetmp`
 }
 
