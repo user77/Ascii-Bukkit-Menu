@@ -356,7 +356,7 @@ fi
 
 # Find PID of Bukkit Server.
 checkServer () {
-  MCPID=`ps -ef |grep -i craftbukkit* |grep -v grep |awk '{ print $2 }'`
+  MCPID=`ps -ef |grep -i craftbukkit* |grep -v grep |grep java |awk '{ print $2 }'`
 }
 
 # Update Bukkit to Latest.
@@ -505,6 +505,7 @@ stopServer () {
       screen -S bukkit-server -X quit
       rm -f /tmp/plugins-$abmid*
       rm -f /tmp/build-$abmid*
+      rm -f /tmp/done-$abmid*
     fi
   fi
 }
@@ -586,6 +587,7 @@ getPlugins () {
 getDone () {
   if [[ ! -f $donetmp ]]; then
     donetmp=`mktemp "/tmp/done-$abmid.XXXXXX"`
+    sleep 1
     grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' > $donetmp
   fi
   doneTime=`cat $donetmp`
