@@ -30,6 +30,15 @@ javaCheck () {
   fi
 }
 
+screenCheck () {
+  screen=`which screen`
+  if [[ -z $screen ]]; then
+    echo "Screen Not Found."
+    echo "Please see http://www.gnu.org/software/screen/"
+    exit 0
+  fi
+}
+
 #Create directory for logs to go in.
 createLogsdir () {
   if [[ ! -d "$logs" ]]; then
