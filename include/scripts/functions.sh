@@ -681,7 +681,6 @@ showInfo () {
   # Check for MineQuery Plugin & Set $playerCount & $players
   if [[ -f "$bukkitdir/plugins/Minequery.jar" ]]; then
     mineQueryinfo=`mktemp "/tmp/minequeryinfo-$abmid.XXXXXX"`
-    #mineQuery=`echo "QUERY" |nc localhost 25566 > $mineQueryinfo`
     mqConnect > $mineQueryinfo
     players=`grep PLAYERLIST $mineQueryinfo | grep PLAYERLIST | awk -F"PLAYERLIST" '{print $2}'|sed -e 's/^[ \t]*//'`
     playerCount=`grep PLAYERCOUNT $mineQueryinfo | grep PLAYERCOUNT|awk -F "PLAYERCOUNT" '{print $2}'`
