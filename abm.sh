@@ -4,8 +4,6 @@ abmdir=
 abmid=$$
 export abmid=$abmid
 clear
-# Check for Deps
-depCheck
 if [ -z $abmdir ]; then
 	echo "ABM First Run."
 	echo "Please enter the path where ABM is installed to."
@@ -26,7 +24,8 @@ abmconfig="$abmdir/include/config/abm.conf"
 TERM=xterm
 source $functions
 source $vars
-
+# Check for Deps
+depCheck
 if [[ ! -f $abmconfig ]]; then
 	   echo
        echo "ABM configuration incomplete or missing."
