@@ -694,7 +694,7 @@ showInfo () {
     if [[ $doneTime ]]; then
       echo -e $txtgrn"Running$txtrst Since: "$uptime", Started in: "$doneTime
     else
-      echo -e $txtgrn"Running$txtrst Since: "$uptime", Started in: Umm... where did that go? One sec..."
+      echo -e $txtgrn"Running$txtrst Since: "$uptime", Started in: Loading..."
     fi
   fi
   if [[ -z $MCPID ]]; then
