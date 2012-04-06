@@ -21,21 +21,55 @@ echo "                                                                          
 echo
 }
 
-javaCheck () {
-  java=`which java`
-  if [ -z $java ]; then
+depCheck () {
+  if [ -z `which java` ]; then
+    echo "Fatal Error!"
     echo "Java Runtime Environment not found."
     echo "Please see http://docs.oracle.com/javase/7/docs/webnotes/install/index.html"
+    echo "ABM can not continue."
     exit 0
   fi
-}
-
-screenCheck () {
-  screen=`which screen`
-  if [[ -z $screen ]]; then
-    echo "Screen Not Found."
+  if [[ -z `which screen` ]]; then
+    echo "Fatal Error!"
+    echo "screen not found."
     echo "Please see http://www.gnu.org/software/screen/"
+    echo "ABM can not continue."
     exit 0
+  fi
+  if [[ -z `which grep` ]]; then
+    echo "Fatal Error!"
+    echo "grep not found."
+    echo "Please see http://www.gnu.org/s/grep/"
+    echo "ABM can not continue."
+    exit 0
+  fi
+  if [[ -z `which wget` ]]; then
+    echo "Warning!"
+    echo "wget not found."
+    echo "Please see http://www.gnu.org/s/wget/"
+    echo "ABM can continue, however you may experiance problems."
+    sleep 2
+  fi
+  if [[ -z `which zip` ]]; then
+    echo "Warning!"
+    echo "zip not found."
+    echo "Please see http://www.info-zip.org/"
+    echo "ABM can continue, however you may experiance problems."
+    sleep 2
+  fi
+  if [[ -z `which logrotate` ]]; then
+    echo "Warning!"
+    echo "logrotate not found."
+    echo "Please see https://fedorahosted.org/logrotate/"
+    echo "ABM can continue, however you may experiance problems."
+    sleep 2
+  fi
+  if [[ -z `which md5sum` ]]; then
+    echo "Warning!"
+    echo "md5sum not found."
+    echo "Please see http://www.gnu.org/software/coreutils/"
+    echo "ABM can continue, however you may experiance problems."
+    sleep 2
   fi
 }
 

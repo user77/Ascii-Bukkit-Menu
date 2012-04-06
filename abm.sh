@@ -4,6 +4,8 @@ abmdir=
 abmid=$$
 export abmid=$abmid
 clear
+# Check for Deps
+depCheck
 if [ -z $abmdir ]; then
 	echo "ABM First Run."
 	echo "Please enter the path where ABM is installed to."
@@ -101,7 +103,6 @@ fi
 	createLogsdir
 	createUpdate
 	screenConf
-	javaCheck
 	screen -c $screenconf
 fi
 clear
