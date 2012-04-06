@@ -19,13 +19,13 @@ if [ -z $abmdir ]; then
 fi
 
 functions="$abmdir/include/scripts/functions.sh"
+# Check for Deps
+depCheck
 vars="$abmdir/include/config/vars"
 abmconfig="$abmdir/include/config/abm.conf"
 TERM=xterm
 source $functions
 source $vars
-# Check for Deps
-depCheck
 if [[ ! -f $abmconfig ]]; then
 	   echo
        echo "ABM configuration incomplete or missing."
