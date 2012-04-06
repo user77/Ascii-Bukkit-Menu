@@ -19,12 +19,12 @@ if [ -z $abmdir ]; then
 fi
 
 functions="$abmdir/include/scripts/functions.sh"
-# Check for Deps
-depCheck
 vars="$abmdir/include/config/vars"
 abmconfig="$abmdir/include/config/abm.conf"
 TERM=xterm
 source $functions
+# Check for Deps
+depCheck
 source $vars
 if [[ ! -f $abmconfig ]]; then
 	   echo
