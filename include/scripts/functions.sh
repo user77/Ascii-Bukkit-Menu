@@ -270,7 +270,7 @@ read -p "Use this Config? [y/n] " answer
  case $answer in
  [yY] | [yY][eE][Ss] )
 cat > "$abmdir/include/config/abm.conf" <<EOF
-abmversion=0.2.7
+abmversion=0.2.8
 
 bukkitBranch=$bukkitBranch
 
