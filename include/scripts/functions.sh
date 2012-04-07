@@ -198,8 +198,8 @@ read -p "[y/n] " ramdisk
 #  fi
 #  exit 0
 #EOF
+#fi
 ####### End of Backup #######
-fi
 clear
 
 # End of Questions. Time to check for missing variables.
