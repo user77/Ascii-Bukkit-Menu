@@ -138,7 +138,6 @@ echo
     echo "You decided upon:"
     echo $shutdownNotify
   fi
-
 echo
 echo "Are you using a ramdisk?" 
 echo "See http://bit.ly/smK9iR for more info."
@@ -160,6 +159,47 @@ read -p "[y/n] " ramdisk
     read -p "Interface Name: " $eth
   fi
 
+####### Start of Backup - Not Complete #######
+#echo
+#echo "ABM can manage backups of your Minecraft worlds"
+#echo "This is achieved though a backup script and cron job."
+#echo "Backups are saved in a zip format compatible with WorldEdit Snapshots."
+#echo "See http://wiki.sk89q.com/wiki/WorldEdit/Snapshots"
+#read -p "Would you like to enable backups? [y/n] " backup
+#if [[ $backup =~ ^(yes|y|Y)$ ]]; then
+#  read -p "Where would you like to store backups?: " backupdir
+#  cat > "$abmdir/include/scripts/backup.sh" <<EOF
+#  filename=`date '+%Y-%m-%d-%H-%M-%S'`
+#  backupdir=$backupdir
+#  log=$bukkitdir/logs/backup.txt
+#  players=`echo "QUERY" |nc localhost 25566 |grep "PLAYERCOUNT" |awk '{ print $2 }'`
+#  saveall="save-all"
+#  saveoff="save-off"
+#  saveon="save-on"
+
+#  if [ $players -gt 0 ]; then
+#    echo "`date '+%Y:%m:%d-%H:%M:%S'` - Players Detected, Starting Backup" >> $log
+#    screen -S bukkit-server -p 0 -X eval 'stuff '"\"$saveall\""'\015'
+#    screen -S bukkit-server -p 0 -X eval 'stuff '"\"$saveoff\""'\015'
+#    cd $bukkitdir/Worlds
+#    sleep 5
+#    for x in ${worlds[*]}
+#      do
+#      if [ ! -d $backupdir/$x ]; then
+#       mkdir -p $backupdir/$x
+#      fi
+#      zip -6 -v -r $backupdir/$x/$filename $x >> $log
+#      find $backupdir/$x -type f -mtime +2 -exec rm {} \; >> $log
+#    done
+#  screen -S bukkit-server -p 0 -X eval 'stuff '"\"$saveon\""'\015'
+#  cd -
+#  elif [ $players = 0 ]; then
+#   echo "`date '+%Y:%m:%d-%H:%M:%S'` - No Players Connected, Skipping Backup"  >> $log
+#  fi
+#  exit 0
+#EOF
+####### End of Backup #######
+fi
 clear
 
 # End of Questions. Time to check for missing variables.
@@ -252,8 +292,7 @@ clear
  fi
 sleep 2
 clear
-echo
-echo "Please review:"
+echo "Please Review:"
 echo
 echo "CraftBukkit Branch: "$bukkitBranch 
 echo "CraftBukkit Directory: "$bukkitdir
