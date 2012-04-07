@@ -663,7 +663,7 @@ showInfo () {
   if [[ $sarbin ]]; then
     if [[ -z $eth ]]; then
       eth=`netstat -rn |grep 0.0.0.0 |head -n 1 |awk '{print $8}'`
-      sed -e "s/$eth/& $eth/g" -i $abmconfig
+      sed -e "s/eth=/&$eth/g" -i $abmconfig
     fi
     sarinfo=`mktemp "/tmp/sarinfo-$abmid.XXXXXX"`
     getSar=`sar -n DEV 1 1 |grep $eth |grep -v "Average:"|grep -v lo|awk '{print $5,$6}' > $sarinfo`
