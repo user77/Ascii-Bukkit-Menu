@@ -681,6 +681,15 @@ mqConnect () {
   cat <&3
 }
 
+killdefunctABM () {
+  for x in `screen -ls |grep [0-9]*.abm-[0-9]*|grep "(Detached)"|cut -d "." -f 1`; 
+    do 
+      echo "Killing PID:" $x;
+      kill $x;
+      sleep 1
+  done
+}
+
 # This is the main info showed in status.sh
 showInfo () {
   checkServer
@@ -689,6 +698,13 @@ showInfo () {
   elif [[ ! -f $abmdir/include/temp/latestabm ]]; then
     wget --quiet -r http://bit.ly/vvizIg -O  $abmdir/include/temp/latestabm
   fi
+# Count Up ABM Sessions on Server
+  abmstmp=`mktemp "/tmp/abmstmp-$abmid.XXXXXX"`
+  screen -ls |grep [0-9]*.abm-[0-9]* > $abmstmp
+  abmAttached=`grep [0-9]*.abm-[0-9]* $abmstmp | grep "(Attached)" | wc -l`
+  abmDetached=`grep [0-9]*.abm-[0-9]* $abmstmp | grep "(Detached)" | wc -l`
+  rm -f $abmstmp
+# End of Count
   load=`uptime|awk -F"average: " '{print $2}'` # Cut everthing after "average:"
   topinfo=`mktemp "/tmp/topinfo-$abmid.XXXXXX"`
   getTop=`top -n 1 -b > $topinfo`
@@ -736,6 +752,7 @@ showInfo () {
       echo -e $txtred"Update Availible:" $latestabm $txtrst
     fi
   fi
+  echo -e $txtbld"ABM Sessions Active:"$txtrst $abmAttached $txtbld"Inactive:"$txtrst $abmDetached
   echo
   echo -e $txtbld"Bukkit Server Info"$txtrst
   if [[ $MCPID ]]; then

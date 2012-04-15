@@ -22,6 +22,7 @@ showMenu () {
 	    echo "    -Will Restart Bukkit"
 	  fi
 	echo " "
+		echo "8:$txtred Kill defunct ABM sessions"$txtrst
         echo "0:$txtred Quit ABM"$txtrst
 }
 
@@ -63,6 +64,9 @@ do
 			;;
 		"7")
 			installmq
+			;;
+		"8")
+			killdefunctABM
 			;;
 		"0")
 			quitFunction
