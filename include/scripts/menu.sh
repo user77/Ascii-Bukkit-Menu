@@ -22,8 +22,8 @@ showMenu () {
 	    echo "    -Will Restart Bukkit"
 	  fi
 	echo " "
-		echo "8:$txtred Kill defunct ABM sessions"$txtrst
-        echo "0:$txtred Quit ABM"$txtrst
+		echo "8:$txtred Kill Inactive ABM Sessions"$txtrst
+		echo "0:$txtred Quit ABM"$txtrst
 }
 
 # Display Menu and wait for choice.

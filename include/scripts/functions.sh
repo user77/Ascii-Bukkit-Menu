@@ -438,13 +438,13 @@ fi
 
 # Find PID of Bukkit Server.
 checkServer () {
-  MCPID=`ps -ef |grep -i craftbukkit* |grep -v grep |grep java |awk '{ print $2 }'`
+  bukkitPID=`ps -ef |grep "java $jargs -jar $bukkitdir/craftbukkit" | grep -v grep | awk '{ print $2 }'`
 }
 
 # Update Bukkit to Latest.
 update () {
   stopServer
-  if [[ ! $MCPID ]]; then
+  if [[ ! $bukkitPID ]]; then
     rm $bukkitdir/craftbukkit*.jar
     if [[ $bukkitBranch = "recommended" ]]; then
       bukkiturl="http://cbukk.it/craftbukkit.jar"
@@ -468,7 +468,7 @@ update () {
       sleep 2
     fi
     startServer
-  elif [[ $MCPID ]]; then
+  elif [[ $bukkitPID ]]; then
     echo -e "Craftbukkit Server Running"
     echo -e "Update Aborted"
     sleep 5
@@ -495,7 +495,7 @@ startServer () {
   checkServer
   # Need to recheck for screen PID for bukket-server session. In case it has been stopped.
   serverscreenpid=`screen -ls |grep bukkit-server |cut -f 1 -d .`
-  if [[ -z $MCPID ]]; then
+  if [[ -z $bukkitPID ]]; then
     logrotate -f -s $abmdir/include/temp/rotate.state $abmdir/include/config/rotate.conf
     rm $abmdir/include/temp/rotate.state
     cd $bukkitdir
@@ -527,7 +527,7 @@ startServer () {
     # Start craftbukkit on existing screen session.
     screen -S bukkit-server -p 0 -X exec java $jargs -jar $bukkitdir/$cbfile nogui
     cd -
-  elif [[ $MCPID ]]; then
+  elif [[ $bukkitPID ]]; then
     echo -e "Server Already Running.."
       sleep 1
   fi
@@ -537,7 +537,7 @@ startServer () {
 stopServer () {
   clear
   checkServer
-  if [[ -z $MCPID ]]; then
+  if [[ -z $bukkitPID ]]; then
     clear
     echo "Bukkit Not Running.."
     sleep 1
@@ -554,7 +554,7 @@ stopServer () {
       fi
       screen -S bukkit-server -p 0 -X eval 'stuff "save-all"\015'
       screen -S bukkit-server -p 0 -X eval 'stuff "stop"\015'
-      while [[ $MCPID ]]; do
+      while [[ $bukkitPID ]]; do
         echo "Bukkit Shutdown in Progress.."
         checkServer
         clear
@@ -594,7 +594,7 @@ stopServer () {
 
 restartServer () {
   stopServer
-  if [[ -z $MCPID ]]; then
+  if [[ -z $bukkitPID ]]; then
     startServer
   fi
 }
@@ -615,16 +615,16 @@ sayCommand () {
   screen -S bukkit-server -p 0 -X eval 'stuff '"\"say $comment\""'\015' 
 }
 
-# Function to clean variables.  Warning: Will clean all variables.
 cleanTmp () {
-# Make sure all temp files are removed. Just in case.
-  rm -f /tmp/topinfo-$abmid*
-  rm -f /tmp/freeinfo-$abmid*
-  rm -f /tmp/sarinfo-$abmid*
-  rm -f /tmp/plugins-$abmid*
-  rm -f /tmp/build-$abmid*
-  rm -f /tmp/minequeryinfo-$abmid.*
-  rm -f /tmp/done-$abmid.*
+# Remove all temp files. Should not effect already set variables.
+  rm -f /tmp/topinfo-*
+  rm -f /tmp/freeinfo-*
+  rm -f /tmp/sarinfo-*
+  rm -f /tmp/plugins-*
+  rm -f /tmp/build-*
+  rm -f /tmp/minequeryinfo-*
+  rm -f /tmp/done-*
+  rm -f /tmp/abmstmp-*
 }
 
 # Quit Function
@@ -637,7 +637,7 @@ quitFunction () {
 
 # Get Craftbukkit Version Info
 getVersion () {
-if [[ $MCPID ]]; then
+if [[ $bukkitPID ]]; then
   if [[ ! -f $buildtmp ]]; then
     buildtmp=`mktemp "/tmp/build-$abmid.XXXXXX"`
     grep "This server is running CraftBukkit" $slog |tail -1 | awk '{print $10, $11, $12}' > $buildtmp
@@ -670,7 +670,7 @@ getDone () {
   if [[ ! -f $donetmp ]]; then
     donetmp=`mktemp "/tmp/done-$abmid.XXXXXX"`
     sleep 1
-    grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' > $donetmp
+    grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' | sed 's/(//g;s/)//g;s/!//g' > $donetmp
   fi
   doneTime=`cat $donetmp`
 }
@@ -681,13 +681,24 @@ mqConnect () {
   cat <&3
 }
 
+abmSessions () {
+  # Count Up ABM Sessions on Server. Both Active and Inactive.
+  abmstmp=`mktemp "/tmp/abmstmp-$abmid.XXXXXX"`
+  screen -ls |grep [0-9]*.abm-[0-9]* > $abmstmp
+  abmAttached=`grep [0-9]*.abm-[0-9]* $abmstmp | grep "(Attached)" | wc -l`
+  abmDetached=`grep [0-9]*.abm-[0-9]* $abmstmp | grep "(Detached)" | wc -l`
+  rm -f $abmstmp
+}
+
 killdefunctABM () {
-  for x in `screen -ls |grep [0-9]*.abm-[0-9]*|grep "(Detached)"|cut -d "." -f 1`; 
-    do 
-      echo "Killing PID:" $x;
-      kill $x;
-      sleep 1
+  for i in `screen -ls |grep [0-9]*.abm-[0-9]*|grep "(Detached)"|cut -d "." -f 1`; do 
+    echo "Killing Session:" $i
+    kill $i
+    sleep 1
   done
+echo "Removing Temp Files"
+cleanTmp
+sleep 2
 }
 
 # This is the main info showed in status.sh
@@ -698,21 +709,16 @@ showInfo () {
   elif [[ ! -f $abmdir/include/temp/latestabm ]]; then
     wget --quiet -r http://bit.ly/vvizIg -O  $abmdir/include/temp/latestabm
   fi
-# Count Up ABM Sessions on Server
-  abmstmp=`mktemp "/tmp/abmstmp-$abmid.XXXXXX"`
-  screen -ls |grep [0-9]*.abm-[0-9]* > $abmstmp
-  abmAttached=`grep [0-9]*.abm-[0-9]* $abmstmp | grep "(Attached)" | wc -l`
-  abmDetached=`grep [0-9]*.abm-[0-9]* $abmstmp | grep "(Detached)" | wc -l`
-  rm -f $abmstmp
-# End of Count
   load=`uptime|awk -F"average: " '{print $2}'` # Cut everthing after "average:"
   topinfo=`mktemp "/tmp/topinfo-$abmid.XXXXXX"`
   getTop=`top -n 1 -b > $topinfo`
   freeinfo=`mktemp "/tmp/freeinfo-$abmid.XXXXXX"`
   getFree=`free -m > $freeinfo`
-  if [[ $MCPID ]]; then
-    bukkitCpuTop=`grep $MCPID $topinfo |awk -F" " '{print $9}'`
-    bukkitMemTop=`grep $MCPID $topinfo |awk -F" " '{print $10}'`
+  # Count Amount of Running ABM sessions.
+  abmSessions
+  if [[ $bukkitPID ]]; then
+    bukkitCpuTop=`grep $bukkitPID $topinfo |awk -F" " '{print $9}'`
+    bukkitMemTop=`grep $bukkitPID $topinfo |awk -F" " '{print $10}'`
   fi
   # Get information from SAR
   if [[ $sarbin ]]; then
@@ -746,25 +752,25 @@ showInfo () {
     rm -f $mineQueryinfo
   fi
   clear
-  echo -e $txtbld"Ascii Bukkit Menu:"$txtrst $abmversion
+  echo -e $txtbld"Ascii Bukkit Menu: "$txtrst$abmversion$txtbld "Session ID: "$txtrst$abmid
   if [[ -n "$latestabm" ]]; then
     if [[ "$latestabm" > "$abmversion" ]]; then
       echo -e $txtred"Update Availible:" $latestabm $txtrst
     fi
   fi
-  echo -e $txtbld"ABM Sessions Active:"$txtrst $abmAttached $txtbld"Inactive:"$txtrst $abmDetached
+  echo -e $txtbld"Sessions Active: "$txtrst$abmAttached$txtbld" Inactive: "$txtrst$abmDetached
   echo
   echo -e $txtbld"Bukkit Server Info"$txtrst
-  if [[ $MCPID ]]; then
-    uptime=`ps -p $MCPID -o stime|grep -v STIME`
+  if [[ $bukkitPID ]]; then
+    uptime=`ps -p $bukkitPID -o stime|grep -v STIME`
     if [[ $doneTime ]]; then
-      echo -e $txtgrn"Running$txtrst Since: "$uptime", Started in: "$doneTime
+      echo -e $txtgrn"Online "$txtrst$txtbld"PID: "$txtrst$bukkitPID$txtbld" StartUp Time: "$txtrst$doneTime$txtbld" Start Time: "$txtrst$uptime
     else
-      echo -e $txtgrn"Running$txtrst Since: "$uptime", Started in: Loading..."
+      echo -e $txtgrn"Online "$txtrst$txtbld"PID: "$txtrst$bukkitPID$txtbld" StartUp Time: "$txtrst"Loading..."$txtbld" Start Time: "$txtrst$uptime
     fi
   fi
-  if [[ -z $MCPID ]]; then
-    echo -e $txtred"Not Running" $txtrst
+  if [[ -z $bukkitPID ]]; then
+    echo -e $txtred"Offline" $txtrst
   fi
   craftbukkit=$bukkitdir/$cbfile
   if [ ! -f $craftbukkit ]; then
@@ -775,7 +781,7 @@ showInfo () {
     echo -e "you restart ABM after install."
     echo
   fi
-  if [[ $MCPID ]]; then
+  if [[ $bukkitPID ]]; then
     if [[ -z $doneTime ]]; then
       getDone
     else
@@ -793,7 +799,7 @@ showInfo () {
       echo -e $txtbld"Plugins"$txtrst $plugins
     fi
   fi
-  if [[ $MCPID ]]; then
+  if [[ $bukkitPID ]]; then
     echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
     echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
     echo -e $txtbld"Connected Players:"$txtrst $playerCount $players
