@@ -460,12 +460,10 @@ update () {
       echo "Please check your ABM Config."
     fi
     cat /dev/null > $slog
-    rm -f /tmp/plugins-$abmid*
-    rm -f /tmp/build-$abmid*
     clear
     if [[ $craftbukkit ]]; then
       echo $txtgrn"Update Successful!"$txtrst
-      sleep 2
+      sleep 1
     fi
     startServer
   elif [[ $bukkitPID ]]; then
@@ -493,6 +491,7 @@ installmq () {
 startServer () {
   clear
   checkServer
+  cleanTmp
   # Need to recheck for screen PID for bukket-server session. In case it has been stopped.
   serverscreenpid=`screen -ls |grep bukkit-server |cut -f 1 -d .`
   if [[ -z $bukkitPID ]]; then
@@ -557,6 +556,7 @@ stopServer () {
       while [[ $bukkitPID ]]; do
         echo "Bukkit Shutdown in Progress.."
         checkServer
+        unset bukkitPID
         clear
       done
       if [[ $ramdisk = true ]]; then
@@ -585,9 +585,7 @@ stopServer () {
         fi
       fi
       screen -S bukkit-server -X quit
-      rm -f /tmp/plugins-$abmid*
-      rm -f /tmp/build-$abmid*
-      rm -f /tmp/done-$abmid*
+      unset bukkitPID
     fi
   fi
 }
@@ -616,15 +614,28 @@ sayCommand () {
 }
 
 cleanTmp () {
-# Remove all temp files. Should not effect already set variables.
+# Remove all temp files. For this ABM Session
+  rm -f /tmp/topinfo-$abmid*
+  rm -f /tmp/freeinfo-$abmid*
+  rm -f /tmp/sarinfo-$abmid*
+  rm -f /tmp/plugins-$abmid*
+  rm -f /tmp/build-$abmid*
+  rm -f /tmp/minequeryinfo-$abmid*
+  rm -f /tmp/abmstmp-$abmid*
+  rm -f /tmp/donetmp-$abmid*
+  rm -f /tmp/bukkitpid-$abmid*
+}
+
+forcecleanTmp () {
+# force remove all temp files. 
   rm -f /tmp/topinfo-*
   rm -f /tmp/freeinfo-*
   rm -f /tmp/sarinfo-*
   rm -f /tmp/plugins-*
   rm -f /tmp/build-*
   rm -f /tmp/minequeryinfo-*
-  rm -f /tmp/done-*
   rm -f /tmp/abmstmp-*
+  rm -f /tmp/donetmp-
 }
 
 # Quit Function
@@ -665,15 +676,12 @@ getPlugins () {
   fi
 }
 
-# function to find "Done" time.
-getDone () {
-  if [[ ! -f $donetmp ]]; then
-    donetmp=`mktemp "/tmp/done-$abmid.XXXXXX"`
-    sleep 1
-    grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' | sed 's/(//g;s/)//g;s/!//g' > $donetmp
-  fi
-  doneTime=`cat $donetmp`
-}
+ getDone () {
+     donetmp=`mktemp "/tmp/donetmp-$abmid.XXXXXX"`
+     grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' | sed 's/(//g;s/)//g;s/!//g' > $donetmp
+     doneTime=`cat $donetmp`
+     rm -f $donetmp
+ }
 
 mqConnect () {
   exec 3<>/dev/tcp/localhost/25566
@@ -696,9 +704,6 @@ killdefunctABM () {
     kill $i
     sleep 1
   done
-echo "Removing Temp Files"
-cleanTmp
-sleep 2
 }
 
 # This is the main info showed in status.sh
@@ -730,7 +735,6 @@ showInfo () {
     getSar=`sar -n DEV 1 1 |grep $eth |grep -v "Average:"|grep -v lo|awk '{print $5,$6}' > $sarinfo`
     netrx=`awk {'print $1'} $sarinfo`
     nettx=`awk {'print $2'} $sarinfo`
-    rm -f $sarinfo
   fi
   totalCpuTop=`grep Cpu $topinfo | cut -d ":" -f 2`
   totalMem=`sed -n 2p $freeinfo |awk '{print $2}'`
@@ -740,8 +744,6 @@ showInfo () {
   totalSwapUsed=`sed -n 4p $freeinfo |awk '{print $3}'`
   totalSwapFree=`sed -n 4p $freeinfo |awk '{print $4}'`
   diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
-  rm -f $topinfo
-  rm -f $freeinfo
   stime=`date`
   # Check for MineQuery Plugin & Set $playerCount & $players
   if [[ -f "$bukkitdir/plugins/Minequery.jar" ]]; then
@@ -762,11 +764,14 @@ showInfo () {
   echo
   echo -e $txtbld"Bukkit Server Info"$txtrst
   if [[ $bukkitPID ]]; then
-    uptime=`ps -p $bukkitPID -o stime|grep -v STIME`
+       uptime=`ps -p $bukkitPID -o stime|grep -v STIME`
+    if [[ -z $doneTime ]]; then
+      getDone
+    fi
     if [[ $doneTime ]]; then
       echo -e $txtgrn"Online "$txtrst$txtbld"PID: "$txtrst$bukkitPID$txtbld" StartUp Time: "$txtrst$doneTime$txtbld" Start Time: "$txtrst$uptime
     else
-      echo -e $txtgrn"Online "$txtrst$txtbld"PID: "$txtrst$bukkitPID$txtbld" StartUp Time: "$txtrst"Loading..."$txtbld" Start Time: "$txtrst$uptime
+      echo -e $txtgrn"Online "$txtrst$txtbld"PID: "$txtrst$bukkitPID$txtbld" StartUp Time: "$txtrst"Loading..."$txtbld" Start Time: "$txtrst$uptime  
     fi
   fi
   if [[ -z $bukkitPID ]]; then
@@ -782,27 +787,17 @@ showInfo () {
     echo
   fi
   if [[ $bukkitPID ]]; then
-    if [[ -z $doneTime ]]; then
+     if [[ -z $doneTime ]]; then
       getDone
     else
-      getVersion
-      getPlugins
-    fi
-    if [[ -z $build ]]; then
-      echo -e $txtbld"Build:"$txtrst "Loading..."
-    elif [[ $build ]]; then
-      echo -e $txtbld"Build:"$txtrst $build
-    fi
-    if [[ -z $plugins ]]; then
-      echo -e $txtbld"Plugins"$txtrst "Loading..."
-    elif [[ $plugins ]]; then
-      echo -e $txtbld"Plugins"$txtrst $plugins
-    fi
-  fi
-  if [[ $bukkitPID ]]; then
-    echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
-    echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
-    echo -e $txtbld"Connected Players:"$txtrst $playerCount $players
+        getVersion
+        getPlugins
+        echo -e $txtbld"Build:"$txtrst $build
+        echo -e $txtbld"Plugins"$txtrst $plugins
+     fi
+        echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
+        echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
+        echo -e $txtbld"Connected Players:"$txtrst $playerCount $players
   fi
   echo
   echo -e $txtbld"System Info"$txtrst
