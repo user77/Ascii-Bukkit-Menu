@@ -7,6 +7,15 @@ abmconfig="$abmdir/include/config/abm.conf"
 source $vars 2>/dev/null
 source $abmconfig 2>/dev/null
 
+# Trap ctrl+c and do cleanup.
+trap ctrl_c INT
+
+ctrl_c() {
+        echo "Quitting ABM"
+        echo "Cleaning Up.."
+        cleanTmp
+}
+
 #Ascii Art
 banner () {
 clear
@@ -135,9 +144,16 @@ echo
     echo "You can edit this later in "$abmconfig
     read -p "Shutdown Message: " shutdownNotify
     echo
-    echo "You decided upon:"
-    echo $shutdownNotify
-  fi
+    echo "If you would like to use a shutdown timer. "
+    echo "Enter shutdown timer in seconds."
+    read -p "Shutdown Timer: " shutdownTimer
+    echo "For immediate shutdown leave blank."
+    echo
+    echo "Shutdown Message:" $shutdownNotify
+    if [[ -n $shutdownTimer ]]; then
+      echo "Shutdown Timer: " $shutdownTimer"s"
+    fi
+      fi
 echo
 echo "Are you using a ramdisk?" 
 echo "See http://bit.ly/smK9iR for more info."
@@ -203,6 +219,7 @@ read -p "[y/n] " ramdisk
 clear
 
 # End of Questions. Time to check for missing variables.
+
   if [[ -z $bukkitBranch ]]; then
     echo
     echo "No CraftBukkit Branch set. Assuming Recommended."
@@ -289,7 +306,15 @@ clear
     echo
     sleep 1
    fi
- fi
+  fi
+
+if [[ -z $shutdownTimer ]]; then
+    shutdownTimer='0'
+    elif [[ -n $shutdownTimer ]]; then
+      shutdownTimer=$shutdownTimer
+    fi
+fi
+
 sleep 2
 clear
 echo "Please Review:"
@@ -302,7 +327,8 @@ echo "RamDisk Used: "$ramdisk
 echo "RamDisk Worlds: " $worlds
 echo "Interface:" $eth
 if [[ $shutdownNotify ]]; then
-  echo "Shutdown Message:" $shutdownNotify
+  echo "Shutdown Message: " $shutdownNotify
+  echo "Shutdow Timer: " $shutdownTimer"s"
 fi
 echo
 read -p "Use this Config? [y/n] " answer
@@ -333,8 +359,9 @@ worlds=( $worlds )
 #NIC To use for SAR
 eth=$eth
 
-#Custom Shutdown Message
+#Custom Shutdown Message & Timer
 shutdownNotify="$shutdownNotify"
+shutdownTimer="$shutdownTimer"
 EOF
 clear
 echo "$abmconfig written successfully"
@@ -550,7 +577,17 @@ stopServer () {
     fi
     if [[ $answer =~ ^(yes|y|Y)$ ]]; then
       if [[ $shutdownNotify ]]; then
+        
         screen -S bukkit-server -p 0 -X eval 'stuff '"\"say $shutdownNotify\""'\015'
+        if [[ -n $shutdownTimer ]]; then
+          for (( x in `seq 1 $shutdownTimer` )); do
+            echo "[CTRL+C] will Kill ABM and cancel shutdown."
+            echo $x"s" of $shutdownTimer"s"
+            sleep 1;
+            clear
+          screen -S bukkit-server -p 0 -X eval 'stuff '"\"say shutdown in $shutdownTimer\""'\015'
+        fi
+
       fi
       screen -S bukkit-server -p 0 -X eval 'stuff "save-all"\015'
       screen -S bukkit-server -p 0 -X eval 'stuff "stop"\015'
