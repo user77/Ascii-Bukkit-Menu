@@ -10,7 +10,7 @@ source $abmconfig 2>/dev/null
 # Trap ctrl+c and do cleanup.
 trap ctrl_c INT
 
-ctrl_c() {
+ctrl_c () {
         echo "Quitting ABM"
         echo "Cleaning Up.."
         cleanTmp
