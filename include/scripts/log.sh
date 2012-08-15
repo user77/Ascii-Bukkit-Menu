@@ -8,8 +8,10 @@ source $functions
 source $vars
 source $abmconfig
 
-# Put somthing into log window so its not empty.
+# Trap ctrl+c and do cleanup.
+trap ctrl_c INT
 
+# Put somthing into log window so its not empty.
 # Watch Bukkit Log in screen window Bukkit_Log
 if [ ! -f "$slog" ]; then
 	touch "$slog"

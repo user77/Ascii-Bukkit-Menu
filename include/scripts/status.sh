@@ -8,6 +8,9 @@ source $functions
 source $vars
 source $abmconfig
 
+# Trap ctrl+c and do cleanup.
+trap ctrl_c INT
+
 #Check for update daily on first startup
 checkUpdate
 banner

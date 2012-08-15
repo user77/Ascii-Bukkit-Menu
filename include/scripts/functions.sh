@@ -7,15 +7,6 @@ abmconfig="$abmdir/include/config/abm.conf"
 source $vars 2>/dev/null
 source $abmconfig 2>/dev/null
 
-# Trap ctrl+c and do cleanup.
-trap ctrl_c INT
-
-ctrl_c () {
-        echo "Quitting ABM"
-        echo "Cleaning Up.."
-        cleanTmp
-}
-
 #Ascii Art
 banner () {
 clear
@@ -28,6 +19,15 @@ echo " / ____ \\\\__ \ (__| | | | |_) | |_| |   <|   <| | |_  | |  | |  __/ | | 
 echo "/_/    \_\___/\___|_|_| |____/ \__,_|_|\_\_|\_\_|\__| |_|  |_|\___|_| |_|\__,_|"
 echo "                                                                               "
 echo
+}
+
+# Trap ctrl+c and do cleanup.
+ ctrl_c () {
+         clear
+         echo "CTRL+C Detected. I won't take it personally."
+         echo "Cleaning Up all temp files.."
+         sleep 3
+         quitFunction
 }
 
 depCheck () {
@@ -144,16 +144,16 @@ echo
     echo "You can edit this later in "$abmconfig
     read -p "Shutdown Message: " shutdownNotify
     echo
-    echo "If you would like to use a shutdown timer. "
     echo "Enter shutdown timer in seconds."
-    read -p "Shutdown Timer: " shutdownTimer
     echo "For immediate shutdown leave blank."
+    echo "This will allow a delay between displaying your custom message and server shutdown."
+    read -p "Shutdown Timer: " shutdownTimer
     echo
     echo "Shutdown Message:" $shutdownNotify
     if [[ -n $shutdownTimer ]]; then
       echo "Shutdown Timer: " $shutdownTimer"s"
     fi
-      fi
+  fi
 echo
 echo "Are you using a ramdisk?" 
 echo "See http://bit.ly/smK9iR for more info."
@@ -219,47 +219,46 @@ read -p "[y/n] " ramdisk
 clear
 
 # End of Questions. Time to check for missing variables.
-
-  if [[ -z $bukkitBranch ]]; then
+if [[ -z $bukkitBranch ]]; then
     echo
     echo "No CraftBukkit Branch set. Assuming Recommended."
     bukkitBranch=recommended
-  elif [[ $bukkitBranch ]]; then
-    if [[ $bukkitBranch =~ ^(recommended|Recommended|r|R|rb|RB|rB|Rb)$ ]]; then
+elif [[ $bukkitBranch ]]; then
+  if [[ $bukkitBranch =~ ^(recommended|Recommended|r|R|rb|RB|rB|Rb)$ ]]; then
+    bukkitBranch=recommended
+  elif [[ $bukkitBranch =~ ^(beta|Beta|BETA|b|B)$ ]]; then
+    bukkitBranch=beta
+  elif [[ $bukkitBranch =~ ^(development|Development|dev|Dev|DEV|d|D)$ ]]; then
+    bukkitBranch=development
+  else
       bukkitBranch=recommended
-    elif [[ $bukkitBranch =~ ^(beta|Beta|BETA|b|B)$ ]]; then
-      bukkitBranch=beta
-    elif [[ $bukkitBranch =~ ^(development|Development|dev|Dev|DEV|d|D)$ ]]; then
-      bukkitBranch=development
-    else
-      bukkitBranch=recommended
-    fi
+  fi
     echo "Craftbukkit Branch set to:" $bukkitBranch
-  fi
+fi
 
-  if [[ -z $bukkitdir ]]; then
-    echo
-    echo "Error no CraftBukkit directory set."
-    read -p "Would you like to run setup again? [y/n] " answer
-      case $answer in
-	[yY] | [yY][eE][Ss] )
-          setupConfig
+if [[ -z $bukkitdir ]]; then
+  echo
+  echo "Error no CraftBukkit directory set."
+  read -p "Would you like to run setup again? [y/n] " answer
+    case $answer in
+  	[yY] | [yY][eE][Ss] )
+      setupConfig
 	  ;;
-	[nN] | [nN][oO] )
-	  echo "Please edit config manually $abmconfig"
+  	[nN] | [nN][oO] )
+  	  echo "Please edit config manually $abmconfig"
 	  ;;
-         *) echo "Invalid Input"
-          ;;
-        esac
-  fi
+   *) echo "Invalid Input"
+    ;;
+    esac
+fi
   
-  if [[ -z $jargs ]]; then
-    echo
-    echo "No Java Arguments set, using defaults.."
-    jargs="-server -Xincgc -Xmx1G"
-    echo $jargs
-    sleep 1
-  fi
+if [[ -z $jargs ]]; then
+  echo
+  echo "No Java Arguments set, using defaults.."
+  jargs="-server -Xincgc -Xmx1G"
+  echo $jargs
+  sleep 1
+fi
 
   if [[ -z $tick ]]; then
     echo
@@ -306,14 +305,13 @@ clear
     echo
     sleep 1
    fi
-  fi
+ fi
 
-if [[ -z $shutdownTimer ]]; then
+  if [[ -z $shutdownTimer ]]; then
     shutdownTimer='0'
-    elif [[ -n $shutdownTimer ]]; then
-      shutdownTimer=$shutdownTimer
-    fi
-fi
+  elif [[ -n $shutdownTimer ]]; then
+    shutdownTimer=$shutdownTimer
+  fi
 
 sleep 2
 clear
@@ -327,8 +325,8 @@ echo "RamDisk Used: "$ramdisk
 echo "RamDisk Worlds: " $worlds
 echo "Interface:" $eth
 if [[ $shutdownNotify ]]; then
-  echo "Shutdown Message: " $shutdownNotify
-  echo "Shutdow Timer: " $shutdownTimer"s"
+  echo "Shutdown Message:" $shutdownNotify
+  echo "Shutdown Timer:" $shutdownTimer"s"
 fi
 echo
 read -p "Use this Config? [y/n] " answer
@@ -362,6 +360,7 @@ eth=$eth
 #Custom Shutdown Message & Timer
 shutdownNotify="$shutdownNotify"
 shutdownTimer="$shutdownTimer"
+
 EOF
 clear
 echo "$abmconfig written successfully"
@@ -487,12 +486,10 @@ update () {
       echo "Please check your ABM Config."
     fi
     cat /dev/null > $slog
-    rm -f /tmp/plugins-$abmid*
-    rm -f /tmp/build-$abmid*
     clear
     if [[ $craftbukkit ]]; then
       echo $txtgrn"Update Successful!"$txtrst
-      sleep 2
+      sleep 1
     fi
     startServer
   elif [[ $bukkitPID ]]; then
@@ -520,6 +517,7 @@ installmq () {
 startServer () {
   clear
   checkServer
+  cleanTmp
   # Need to recheck for screen PID for bukket-server session. In case it has been stopped.
   serverscreenpid=`screen -ls |grep bukkit-server |cut -f 1 -d .`
   if [[ -z $bukkitPID ]]; then
@@ -577,23 +575,23 @@ stopServer () {
     fi
     if [[ $answer =~ ^(yes|y|Y)$ ]]; then
       if [[ $shutdownNotify ]]; then
-        
         screen -S bukkit-server -p 0 -X eval 'stuff '"\"say $shutdownNotify\""'\015'
         if [[ -n $shutdownTimer ]]; then
-          for (( x in `seq 1 $shutdownTimer` )); do
+          screen -S bukkit-server -p 0 -X eval 'stuff '"\"say Server Shutdown in $shutdownTimer seconds\""'\015'
+          for x in `seq 1 $shutdownTimer`; do
             echo "[CTRL+C] will Kill ABM and cancel shutdown."
             echo $x"s" of $shutdownTimer"s"
             sleep 1;
             clear
-          screen -S bukkit-server -p 0 -X eval 'stuff '"\"say shutdown in $shutdownTimer\""'\015'
-        fi
-
+          done
+       fi
       fi
       screen -S bukkit-server -p 0 -X eval 'stuff "save-all"\015'
       screen -S bukkit-server -p 0 -X eval 'stuff "stop"\015'
       while [[ $bukkitPID ]]; do
         echo "Bukkit Shutdown in Progress.."
         checkServer
+        unset bukkitPID
         clear
       done
       if [[ $ramdisk = true ]]; then
@@ -622,9 +620,7 @@ stopServer () {
         fi
       fi
       screen -S bukkit-server -X quit
-      rm -f /tmp/plugins-$abmid*
-      rm -f /tmp/build-$abmid*
-      rm -f /tmp/done-$abmid*
+      unset bukkitPID
     fi
   fi
 }
@@ -653,15 +649,28 @@ sayCommand () {
 }
 
 cleanTmp () {
-# Remove all temp files. Should not effect already set variables.
+# Remove all temp files. For this ABM Session
+  rm -f /tmp/topinfo-$abmid*
+  rm -f /tmp/freeinfo-$abmid*
+  rm -f /tmp/sarinfo-$abmid*
+  rm -f /tmp/plugins-$abmid*
+  rm -f /tmp/build-$abmid*
+  rm -f /tmp/minequeryinfo-$abmid*
+  rm -f /tmp/abmstmp-$abmid*
+  rm -f /tmp/donetmp-$abmid*
+  rm -f /tmp/bukkitpid-$abmid*
+}
+
+forcecleanTmp () {
+# force remove all temp files. 
   rm -f /tmp/topinfo-*
   rm -f /tmp/freeinfo-*
   rm -f /tmp/sarinfo-*
   rm -f /tmp/plugins-*
   rm -f /tmp/build-*
   rm -f /tmp/minequeryinfo-*
-  rm -f /tmp/done-*
   rm -f /tmp/abmstmp-*
+  rm -f /tmp/donetmp-
 }
 
 # Quit Function
@@ -702,15 +711,12 @@ getPlugins () {
   fi
 }
 
-# function to find "Done" time.
-getDone () {
-  if [[ ! -f $donetmp ]]; then
-    donetmp=`mktemp "/tmp/done-$abmid.XXXXXX"`
-    sleep 1
-    grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' | sed 's/(//g;s/)//g;s/!//g' > $donetmp
-  fi
-  doneTime=`cat $donetmp`
-}
+ getDone () {
+     donetmp=`mktemp "/tmp/donetmp-$abmid.XXXXXX"`
+     grep "Done ([0-9]\{1,\}\.[0-9]\{1,\}s)\!" $slog | awk '{print $5}' | sed 's/(//g;s/)//g;s/!//g' > $donetmp
+     doneTime=`cat $donetmp`
+     rm -f $donetmp
+ }
 
 mqConnect () {
   exec 3<>/dev/tcp/localhost/25566
@@ -733,9 +739,6 @@ killdefunctABM () {
     kill $i
     sleep 1
   done
-echo "Removing Temp Files"
-cleanTmp
-sleep 2
 }
 
 # This is the main info showed in status.sh
@@ -764,10 +767,9 @@ showInfo () {
       sed -e "s/eth=/&$eth/g" -i $abmconfig
     fi
     sarinfo=`mktemp "/tmp/sarinfo-$abmid.XXXXXX"`
-    getSar=`sar -n DEV 1 1 |grep $eth |grep -v "Average:"|grep -v lo|awk '{print $5,$6}' > $sarinfo`
+    getSar=`sar -n DEV 1 1 |grep $eth |grep -v "Average:"|grep -v lo|awk '{print $6,$7}' > $sarinfo`
     netrx=`awk {'print $1'} $sarinfo`
     nettx=`awk {'print $2'} $sarinfo`
-    rm -f $sarinfo
   fi
   totalCpuTop=`grep Cpu $topinfo | cut -d ":" -f 2`
   totalMem=`sed -n 2p $freeinfo |awk '{print $2}'`
@@ -777,8 +779,6 @@ showInfo () {
   totalSwapUsed=`sed -n 4p $freeinfo |awk '{print $3}'`
   totalSwapFree=`sed -n 4p $freeinfo |awk '{print $4}'`
   diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
-  rm -f $topinfo
-  rm -f $freeinfo
   stime=`date`
   # Check for MineQuery Plugin & Set $playerCount & $players
   if [[ -f "$bukkitdir/plugins/Minequery.jar" ]]; then
@@ -799,11 +799,14 @@ showInfo () {
   echo
   echo -e $txtbld"Bukkit Server Info"$txtrst
   if [[ $bukkitPID ]]; then
-    uptime=`ps -p $bukkitPID -o stime|grep -v STIME`
+       uptime=`ps -p $bukkitPID -o stime|grep -v STIME`
+    if [[ -z $doneTime ]]; then
+      getDone
+    fi
     if [[ $doneTime ]]; then
       echo -e $txtgrn"Online "$txtrst$txtbld"PID: "$txtrst$bukkitPID$txtbld" StartUp Time: "$txtrst$doneTime$txtbld" Start Time: "$txtrst$uptime
     else
-      echo -e $txtgrn"Online "$txtrst$txtbld"PID: "$txtrst$bukkitPID$txtbld" StartUp Time: "$txtrst"Loading..."$txtbld" Start Time: "$txtrst$uptime
+      echo -e $txtgrn"Online "$txtrst$txtbld"PID: "$txtrst$bukkitPID$txtbld" StartUp Time: "$txtrst"Loading..."$txtbld" Start Time: "$txtrst$uptime  
     fi
   fi
   if [[ -z $bukkitPID ]]; then
@@ -812,34 +815,24 @@ showInfo () {
   craftbukkit=$bukkitdir/$cbfile
   if [ ! -f $craftbukkit ]; then
     echo -e $txtred"Not Installed"$txtrst
-    echo -e $txtred"Choose Option 6 to install"$txtrst
+    echo -e $txtred"Choose: Advanced (9) Update Bukkit (1)"$txtrst
     echo -e "If this is your first time installing"
-    echo -e "Craftbukkit, then it is recommended"
+    echo -e "Bukkit, then it is recommended"
     echo -e "you restart ABM after install."
     echo
   fi
   if [[ $bukkitPID ]]; then
-    if [[ -z $doneTime ]]; then
+     if [[ -z $doneTime ]]; then
       getDone
     else
-      getVersion
-      getPlugins
-    fi
-    if [[ -z $build ]]; then
-      echo -e $txtbld"Build:"$txtrst "Loading..."
-    elif [[ $build ]]; then
-      echo -e $txtbld"Build:"$txtrst $build
-    fi
-    if [[ -z $plugins ]]; then
-      echo -e $txtbld"Plugins"$txtrst "Loading..."
-    elif [[ $plugins ]]; then
-      echo -e $txtbld"Plugins"$txtrst $plugins
-    fi
-  fi
-  if [[ $bukkitPID ]]; then
-    echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
-    echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
-    echo -e $txtbld"Connected Players:"$txtrst $playerCount $players
+        getVersion
+        getPlugins
+        echo -e $txtbld"Build:"$txtrst $build
+        echo -e $txtbld"Plugins"$txtrst $plugins
+     fi
+        echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
+        echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
+        echo -e $txtbld"Connected Players:"$txtrst $playerCount $players
   fi
   echo
   echo -e $txtbld"System Info"$txtrst
