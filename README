@@ -23,7 +23,7 @@ ScreenShot
 
 Download:
 
-Latest Release 0.2.6
+Latest Release 0.2.8
 
 Dependencies:
 
@@ -37,8 +37,8 @@ wget http://www.gnu.org/s/wget/
 zip / unzip
 logrotate
 md5sum
-netcat (optional to see connected players if using minequery)
 sysstat utilities (optional to see network usage)
+python 2.x (option to see player list)
 Install:
 
 NEW Method:

@@ -24,8 +24,8 @@ echo
 # Trap ctrl+c and do cleanup.
  ctrl_c () {
          clear
-         echo "CTRL+C Detected. I won't take it personally."
-         echo "Cleaning Up all temp files.."
+         echo "CTRL+C Detected."
+         echo "Cleaning Up all TEMP files.."
          sleep 3
          quitFunction
 }
@@ -724,6 +724,35 @@ mqConnect () {
   cat <&3
 }
 
+findplayers () {
+
+socksend ()
+{
+  echo -ne "\xFE" >&5 &
+}
+
+sockread ()
+{
+  LENGTH="$1"
+  RETURN=`dd bs=$1 count=1 <&5 2> /dev/null`
+  exec 5>&- 
+}
+
+# try to connect
+if ! exec 5<> /dev/tcp/localhost/25565; then
+  exit 1
+fi
+
+# send request
+socksend
+
+# read 64 bytes for "success"
+sockread 64
+
+slotsUsed=`echo -e "$RETURN" |awk -F"[§]" '{print $2}'`
+slotsMax=`echo -e "$RETURN" |awk -F"[§]" '{print $3}'`
+}
+
 abmSessions () {
   # Count Up ABM Sessions on Server. Both Active and Inactive.
   abmstmp=`mktemp "/tmp/abmstmp-$abmid.XXXXXX"`
@@ -780,14 +809,15 @@ showInfo () {
   totalSwapFree=`sed -n 4p $freeinfo |awk '{print $4}'`
   diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
   stime=`date`
+  
   # Check for MineQuery Plugin & Set $playerCount & $players
-  if [[ -f "$bukkitdir/plugins/Minequery.jar" ]]; then
-    mineQueryinfo=`mktemp "/tmp/minequeryinfo-$abmid.XXXXXX"`
-    mqConnect > $mineQueryinfo
-    players=`grep PLAYERLIST $mineQueryinfo | grep PLAYERLIST | awk -F"PLAYERLIST" '{print $2}'|sed -e 's/^[ \t]*//'`
-    playerCount=`grep PLAYERCOUNT $mineQueryinfo | grep PLAYERCOUNT|awk -F "PLAYERCOUNT" '{print $2}'`
-    rm -f $mineQueryinfo
-  fi
+   if [[ -f "$bukkitdir/plugins/Minequery.jar" ]]; then
+     mineQueryinfo=`mktemp "/tmp/minequeryinfo-$abmid.XXXXXX"`
+     mqConnect > $mineQueryinfo
+     players=`grep PLAYERLIST $mineQueryinfo | grep PLAYERLIST | awk -F"PLAYERLIST" '{print $2}'|sed -e 's/^[ \t]*//'`
+     playerCount=`grep PLAYERCOUNT $mineQueryinfo | grep PLAYERCOUNT|awk -F "PLAYERCOUNT" '{print $2}'`
+     rm -f $mineQueryinfo
+   fi
   clear
   echo -e $txtbld"Ascii Bukkit Menu: "$txtrst$abmversion$txtbld "Session ID: "$txtrst$abmid
   if [[ -n "$latestabm" ]]; then
@@ -832,7 +862,9 @@ showInfo () {
      fi
         echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
         echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
-        echo -e $txtbld"Connected Players:"$txtrst $playerCount $players
+        findplayers
+        echo -e $txtbld"Connected:"$txtrst $slotsUsed"/"$slotsMax
+        echo -e $txtbld"Players:"$txtrst $playerCount $players
   fi
   echo
   echo -e $txtbld"System Info"$txtrst
@@ -846,6 +878,9 @@ showInfo () {
   fi
   echo -e $txtbld"Load:"$txtrst $load
   echo -e $txtbld"Time:"$txtrst $stime
+# Do some garbage collection
+cleanTmp
+unset bukkitPID
 }
 
 
