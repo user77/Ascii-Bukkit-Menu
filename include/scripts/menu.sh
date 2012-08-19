@@ -35,6 +35,7 @@ while [ 1 ]
   	echo "1:$txtwht Update Bukkit"$txtrst
   	echo "2:$txtwht Kill Inactive ABM Sessions"$txtrst
 	echo "3:$txtwht Delete ABM Temp Files"$txtrst
+        echo "4:$txtwht Deprecated: Install Minequery"$txtrst
 	echo
 	echo "0:$txtwht Return To Main Menu"$txtrst
 	echo
@@ -50,6 +51,9 @@ while [ 1 ]
 		"3")
 			forcecleanTmp
 			;;
+                "4")
+                        installmq
+                        ;;
 		"0")
 			break
             ;;
@@ -91,11 +95,8 @@ do
 		"5")
 			sayCommand
 			;;
-		"s")
+		"t")
 			sayCommand
-			;;
-		"6")
-			installmq
 			;;
 		"9")
 			advancedMenu
