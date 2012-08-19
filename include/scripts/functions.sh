@@ -550,7 +550,7 @@ startServer () {
       fi
     fi
     # Start craftbukkit on existing screen session.
-    screen -S bukkit-server -p 0 -X exec java $jargs -jar $bukkitdir/$cbfile nogui
+    screen -S bukkit-server -p 0 -X exec java $jargs -jar $bukkitdir/$cbfile
     cd -
   elif [[ $bukkitPID ]]; then
     echo -e "Server Already Running.."
