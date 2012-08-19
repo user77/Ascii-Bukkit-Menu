@@ -746,11 +746,12 @@ fi
 # send request
 socksend
 
-# read 64 bytes for "success"
-sockread 64
+# read up to 1024 bytes for success. This is to deal with long MOTDs
+sockread 1024
 
-slotsUsed=`echo -e "$RETURN" |awk -F"[§]" '{print $2}'`
-slotsMax=`echo -e "$RETURN" |awk -F"[§]" '{print $3}'`
+slotsUsed=`echo -e "$RETURN" |awk -F"\xA7" '{print $2}'`
+slotsMax=`echo "$RETURN" |awk -F"\xA7" '{print $3}'`
+motd=`echo -e "$RETURN" |awk -F"\xFF\x4D" '{print $2}'|awk -F"\xA7" '{print $1}'`
 }
 
 abmSessions () {
@@ -852,6 +853,7 @@ showInfo () {
     echo
   fi
   if [[ $bukkitPID ]]; then
+    findplayers
      if [[ -z $doneTime ]]; then
       getDone
     else
@@ -862,9 +864,9 @@ showInfo () {
      fi
         echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
         echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
-        findplayers
         echo -e $txtbld"Connected:"$txtrst $slotsUsed"/"$slotsMax
         echo -e $txtbld"Players:"$txtrst $playerCount $players
+        echo -e $txtbld"MOTD:"$txtrst $motd
   fi
   echo
   echo -e $txtbld"System Info"$txtrst
