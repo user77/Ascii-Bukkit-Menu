@@ -564,41 +564,35 @@ stopServer () {
   checkServer
   if [[ -z $bukkitPID ]]; then
     clear
-    echo "Bukkit Not Running.."
+    printf "Bukkit Not Running..."
     sleep 1
   else
     if [[ $silent != "--stop" ]]; then
       read -p "Confirm Shutdown. [Y/N] " answer
+    elif [[ $silent = "--stop" ]]; then
+        answer=y
     fi
-    if [[ $silent = "--stop" ]]; then
-      answer=y
-    fi
-    if [[ $answer =~ ^(yes|y|Y)$ ]]; then
-      if [[ $shutdownNotify ]]; then
+    if [[ $answer =~ ^([yY][eE][sS]|[yY])$ ]]; then
+      if [[ -n $shutdownNotify ]]; then
         screen -S bukkit-server -p 0 -X eval 'stuff '"\"say $shutdownNotify\""'\015'
         if [[ -n $shutdownTimer ]]; then
-          screen -S bukkit-server -p 0 -X eval 'stuff '"\"say Server Shutdown in $shutdownTimer seconds\""'\015'
-          for x in `seq 1 $shutdownTimer`; do
-            echo "[CTRL+C] will Kill ABM and cancel shutdown."
-            echo $x"s" of $shutdownTimer"s"
-            sleep 1;
-            clear
-          done
-       fi
+          screen -S bukkit-server -p 0 -X eval 'stuff '"\"say $shutdownTimer seconds untill server shutdown\""'\015'
+          sleep $shutdownTimer
+        fi
       fi
-      screen -S bukkit-server -p 0 -X eval 'stuff "save-all"\015'
       screen -S bukkit-server -p 0 -X eval 'stuff "stop"\015'
       while [[ $bukkitPID ]]; do
-        echo "Bukkit Shutdown in Progress.."
+        printf "Bukkit Shutdown in Progress.."
         checkServer
-        unset bukkitPID
         clear
       done
-      if [[ $ramdisk = true ]]; then
+      screen -S bukkit-server -X quit
+      rm -f /tmp/plugins-$abmid*
+      rm -f /tmp/build-$abmid*
+      if [[ $ramdisk = "true" ]]; then
         read -p "Would you like copy from ram disk to local disk? [Y/N] " answer
-        if [[ $answer =~ ^(yes|y|Y)$ ]]; then
-          for x in ${worlds[*]}
-          do
+        if [[ $answer =~ ^([yY][eE][sS]|[yY])$ ]]; then
+          for x in ${worlds[*]}; do
             cp -rfv "$bukkitdir/$x/"* "$bukkitdir/$x-offline/"  >>  "$bukkitdir/server.log"
             find "$bukkitdir/$x" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$abmdir/include/temp/$x.md5"
             find "$bukkitdir/$x-offline" -type f -print0 | xargs -0 md5sum | cut -f 1 -d " " | sort -rn > "$abmdir/include/temp/$x-offline.md5"
@@ -610,17 +604,19 @@ stopServer () {
               read -p "Hit any key to continue..."
               clear
             elif [[ -z "$md5" ]]; then
-              clear
-              echo $txtgrn "Copied $x from ram disk to local disk sucessully!" $txtrst
-              sleep 2
-              clear
+                clear
+                echo $txtgrn "Copied $x from ram disk to local disk sucessully!" $txtrst
+                sleep 2
+                clear
             fi
             rm -f "$abmdir/include/temp/$x.md5" "$abmdir/include/temp/$x-offline.md5"
           done
         fi
       fi
-      screen -S bukkit-server -X quit
-      unset bukkitPID
+    elif [[ $answer =~ ^([nN][oO]|[nN])$ ]]; then
+      clear
+      printf "Shutdown Aborted"
+      sleep 2
     fi
   fi
 }
