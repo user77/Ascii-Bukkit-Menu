@@ -839,7 +839,7 @@ showInfo () {
       getVersion
       getPlugins
       echo -e $txtbld"Build:"$txtrst $build
-      echo -e $txtbld"Plugins"$txtrst $plugins
+      
     fi
       echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
       echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
@@ -848,6 +848,7 @@ showInfo () {
         echo -e $txtbld"MOTD:"$txtrst $motd
         echo -e $txtbld"Players:"$txtrst [$numPlayers/$maxPlayers] $players
       fi
+      echo -e $txtbld"Plugins"$txtrst $plugins
   fi
   echo
   echo -e $txtbld"System Info"$txtrst
