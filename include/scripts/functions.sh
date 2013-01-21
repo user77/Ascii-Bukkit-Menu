@@ -846,9 +846,11 @@ showInfo () {
       if [[ $argparse = "true" ]]; then
         queryServer
         echo -e $txtbld"MOTD:"$txtrst $motd
-        echo -e $txtbld"Players:"$txtrst [$numPlayers/$maxPlayers] $players
       fi
       echo -e $txtbld"Plugins"$txtrst $plugins
+      if [[ $argparse = "true" ]]; then
+        echo -e $txtbld"Players:"$txtrst [$numPlayers/$maxPlayers] $players
+      fi
   fi
   echo
   echo -e $txtbld"System Info"$txtrst
