@@ -92,11 +92,14 @@ depCheck () {
     if [ -n "$argparse" ]; then
       export argparse=false
       echo 
-      echo "WARNING! Missing argparse"
-      echo "This may Help:"
-      echo "# yum -y install python-setuptools.noarch"
-      echo "# curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python"
-      echo "# pip install argparse"
+      echo "WARNING! Missing argparse module."
+      echo "Looks like you're probably running an older version of python 2.6.x"
+      echo "http://pypi.python.org/pypi/argparse"
+      echo
+      echo "Run the following commands as root to install the argparse module."
+      echo "1. # yum -y install python-setuptools.noarch "
+      echo "2. # curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python "
+      echo "3. # pip install argparse "
       read -p "Press [ENTER] key to continue..."
     fi
     if [[ -z "$argparse" ]]; then
