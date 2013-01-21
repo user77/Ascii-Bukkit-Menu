@@ -18,11 +18,6 @@ showMainMenu () {
     echo "3:$txtylw Restart"$txtrst
 	echo "4:$txtwht Send Server Command"$txtrst
 	echo "5:$txtwht Say"$txtrst
-	  if [[ ! -f "$bukkitdir/plugins/Minequery.jar" ]]; then
-	    echo "6:$txtwht Install Minequery"$txtrst
-	    echo "    -Adds Functionality"
-	    echo "    -Will Restart Bukkit"
-	  fi
 	echo "9:$txtwht Advanced"$txtrst
 	echo
 	echo "0:$txtred Quit ABM"$txtrst
@@ -35,7 +30,6 @@ while [ 1 ]
   	echo "1:$txtwht Update Bukkit"$txtrst
   	echo "2:$txtwht Kill Inactive ABM Sessions"$txtrst
 	echo "3:$txtwht Delete ABM Temp Files"$txtrst
-        echo "4:$txtwht Deprecated: Install Minequery"$txtrst
 	echo
 	echo "0:$txtwht Return To Main Menu"$txtrst
 	echo
@@ -51,9 +45,6 @@ while [ 1 ]
 		"3")
 			forcecleanTmp
 			;;
-                "4")
-                        installmq
-                        ;;
 		"0")
 			break
             ;;

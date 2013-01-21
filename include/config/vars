@@ -1,5 +1,5 @@
 #!/bin/bash
-abmdir=
+abmdir=/home/jon/Ascii-Bukkit-Menu
 abmconfig="$abmdir/include/config/abm.conf"
 source $abmconfig 2>/dev/null
 

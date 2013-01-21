@@ -57,28 +57,51 @@ depCheck () {
     echo "wget not found."
     echo "Please see http://www.gnu.org/s/wget/"
     echo "ABM can continue, however you may experiance problems."
-    sleep 2
+    read -p "Press [ENTER] key to continue..."
   fi
   if [[ -z `which zip` ]]; then
     echo "Warning!"
     echo "zip not found."
     echo "Please see http://www.info-zip.org/"
     echo "ABM can continue, however you may experiance problems."
-    sleep 2
+    read -p "Press [ENTER] key to continue..."
   fi
   if [[ -z `which logrotate` ]]; then
     echo "Warning!"
     echo "logrotate not found."
     echo "Please see https://fedorahosted.org/logrotate/"
     echo "ABM can continue, however you may experiance problems."
-    sleep 2
+    read -p "Press [ENTER] key to continue..."
   fi
   if [[ -z `which md5sum` ]]; then
     echo "Warning!"
     echo "md5sum not found."
     echo "Please see http://www.gnu.org/software/coreutils/"
     echo "ABM can continue, however you may experiance problems."
-    sleep 2
+    read -p "Press [ENTER] key to continue..."
+  fi
+  if [[ -z `which python` ]]; then
+    echo "Warning!"
+    echo "Python not found."
+    echo "ABM can continue, however you may not have the best experiance."
+    read -p "Press [ENTER] key to continue..."
+  fi
+  if [[ `which python` ]]; then
+    python=`which python`
+   argparse=`$python -c 'import argparse' 2>&1`
+    if [ -n "$argparse" ]; then
+      export argparse=false
+      echo 
+      echo "WARNING! Missing argparse"
+      echo "This may Help:"
+      echo "# yum -y install python-setuptools.noarch"
+      echo "# curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python"
+      echo "# pip install argparse"
+      read -p "Press [ENTER] key to continue..."
+    fi
+    if [[ -z "$argparse" ]]; then
+      export argparse=true
+    fi
   fi
 }
 
@@ -499,20 +522,6 @@ update () {
   fi
 }
 
-
-
-# Install MineQuery Plugin. Restart Server.
-installmq () {
-  clear
-  wget -m -nd --progress=dot:mega -P $abmdir/include/temp/ https://github.com/downloads/vexsoftware/minequery/Minequery-1.5.zip
-  unzip -o $abmdir/include/temp/Minequery-1.5.zip -d $bukkitdir/plugins
-  rm $abmdir/include/temp/Minequery-1.5.zip
-  clear
-  stopServer
-  startServer
-}
-
-
 # Start Bukkit Server
 startServer () {
   clear
@@ -714,40 +723,22 @@ getPlugins () {
      rm -f $donetmp
  }
 
-mqConnect () {
-  exec 3<>/dev/tcp/localhost/25566
-  echo -e "QUERY" >&3
-  cat <&3
-}
-
-findplayers () {
-
-socksend ()
-{
-  echo -ne "\xFE" >&5 &
-}
-
-sockread ()
-{
-  LENGTH="$1"
-  RETURN=`dd bs=$1 count=1 <&5 2> /dev/null`
-  exec 5>&- 
-}
-
-# try to connect
-if ! exec 5<> /dev/tcp/localhost/25565; then
-  exit 1
-fi
-
-# send request
-socksend
-
-# read up to 1024 bytes for success. This is to deal with long MOTDs
-sockread 1024
-
-slotsUsed=`echo -e "$RETURN" |awk -F"\xA7" '{print $2}'`
-slotsMax=`echo "$RETURN" |awk -F"\xA7" '{print $3}'`
-motd=`echo -e "$RETURN" |awk -F"\xFF\x4D" '{print $2}'|awk -F"\xA7" '{print $1}'`
+queryServer () {
+  queryEnabled=`grep enable-query=true $bukkitdir/server.properties`
+  serverIP=`grep "server-ip=" $bukkitdir/server.properties | cut -d = -f 2`
+  querryPort=`grep "query.port=" $bukkitdir/server.properties |cut -d = -f 2`
+  if [[ $queryEnabled ]]; then
+    if [[ $serverIP ]]; then
+      serverIP=$serverIP
+    else
+      serverIP=127.0.0.1
+    fi
+    queryResults=`$abmdir/include/scripts/mcstatus/cli.py $serverIP -p $querryPort`
+    motd=`echo "$queryResults"|grep 'motd'|cut -d : -f2|sed "s/'//g;s/,//g"`
+    numPlayers=`echo "$queryResults"|grep 'numplayers'|cut -d : -f2|sed "s/,//g;s/^[ \t]*//"`
+    maxPlayers=`echo "$queryResults"|grep 'maxplayers'|cut -d : -f2|sed "s/,//g;s/^[ \t]*//"`
+    players=`echo "$queryResults"|grep "'players':"|cut -d: -f2 |sed "s/'//g;s/\[//g;s/\]//g;s/,*$//g"`
+  fi
 }
 
 abmSessions () {
@@ -806,15 +797,7 @@ showInfo () {
   totalSwapFree=`sed -n 4p $freeinfo |awk '{print $4}'`
   diskuse=`df -h $bukkitdir|grep -e "%" |grep -v "Filesystem"|grep -o '[0-9]\{1,3\}%'`
   stime=`date`
-  
-  # Check for MineQuery Plugin & Set $playerCount & $players
-   if [[ -f "$bukkitdir/plugins/Minequery.jar" ]]; then
-     mineQueryinfo=`mktemp "/tmp/minequeryinfo-$abmid.XXXXXX"`
-     mqConnect > $mineQueryinfo
-     players=`grep PLAYERLIST $mineQueryinfo | grep PLAYERLIST | awk -F"PLAYERLIST" '{print $2}'|sed -e 's/^[ \t]*//'`
-     playerCount=`grep PLAYERCOUNT $mineQueryinfo | grep PLAYERCOUNT|awk -F "PLAYERCOUNT" '{print $2}'`
-     rm -f $mineQueryinfo
-   fi
+
   clear
   echo -e $txtbld"Ascii Bukkit Menu: "$txtrst$abmversion$txtbld "Session ID: "$txtrst$abmid
   if [[ -n "$latestabm" ]]; then
@@ -848,21 +831,23 @@ showInfo () {
     echo -e "you restart ABM after install."
     echo
   fi
+
   if [[ $bukkitPID ]]; then
-    findplayers
-     if [[ -z $doneTime ]]; then
+    if [[ -z $doneTime ]]; then
       getDone
     else
-        getVersion
-        getPlugins
-        echo -e $txtbld"Build:"$txtrst $build
-        echo -e $txtbld"Plugins"$txtrst $plugins
-     fi
-        echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
-        echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
-        echo -e $txtbld"Connected:"$txtrst $slotsUsed"/"$slotsMax
-        echo -e $txtbld"Players:"$txtrst $playerCount $players
+      getVersion
+      getPlugins
+      echo -e $txtbld"Build:"$txtrst $build
+      echo -e $txtbld"Plugins"$txtrst $plugins
+    fi
+      echo -e $txtbld"CPU Usage:"$txtrst $bukkitCpuTop"%"
+      echo -e $txtbld"Mem Usage:"$txtrst $bukkitMemTop"%"
+      if [[ $argparse = "true" ]]; then
+        queryServer
         echo -e $txtbld"MOTD:"$txtrst $motd
+        echo -e $txtbld"Players:"$txtrst [$numPlayers/$maxPlayers] $players
+      fi
   fi
   echo
   echo -e $txtbld"System Info"$txtrst
