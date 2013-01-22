@@ -41,19 +41,20 @@ sysstat utilities (optional to see network usage)
 python 2.x (option to see player list)
 Install:
 
-NEW Method:
+AutoMagic Method:
 This will download and install ABM, then run an interactive script to setup the configuration.
 No need to edit config manually.
 Simply copy and paste the following to a bash shell.
 
-wget http://dev.bukkit.org/media/files/580/690/install.sh && chmod +x install.sh && ./install.sh
-alternate method - zip:
+wget http://dev.bukkit.org/media/files/666/822/install.sh && chmod +x install.sh && ./install.sh
+Traditional method - zip:
 
-wget http://dev.bukkit.org/media/files/580/688/abm-0.2.6.zip
-unzip abm-0.2.6.zip
-cd Ascii-Bukkit-Menu
-./abm.sh
-Usage:
+wget http://dev.bukkit.org/media/files/666/820/abm-0.2.8.zip
+unzip abm-0.2.8.zip
+Experimental Builds - git:
+Not for the faint of heart.
+
+git clone https://user77@github.com/user77/Ascii-Bukkit-Menu.git
 
 To use ABM simply change to the directory you installed it to and run the abm.sh script.
 
@@ -74,7 +75,7 @@ Issues:
 
 Dosen't work on screen without vertical support.
 
-    Copyright (C) 2012 
+    Copyright (C) 2013 
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
