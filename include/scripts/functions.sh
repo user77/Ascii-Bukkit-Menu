@@ -740,7 +740,7 @@ queryServer () {
     motd=`echo "$queryResults"|grep 'motd'|cut -d : -f2|sed "s/'//g;s/,//g"`
     numPlayers=`echo "$queryResults"|grep 'numplayers'|cut -d : -f2|sed "s/,//g;s/^[ \t]*//"`
     maxPlayers=`echo "$queryResults"|grep 'maxplayers'|cut -d : -f2|sed "s/,//g;s/^[ \t]*//"`
-    players=`echo "$queryResults"|grep "'players':"|cut -d: -f2 |sed "s/'//g;s/\[//g;s/\]//g;s/,*$//g"`
+    players=`echo "$queryResults"|awk "/'players':/,/]/"|cut -d: -f2 |sed "s/'//g;s/\[//g;s/\]//g;s/,*$//g;s/^[ \t]*//;s/[ \t]*$//"|tr "/" "\n"`
   fi
 }
 
