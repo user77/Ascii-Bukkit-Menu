@@ -56,34 +56,34 @@ depCheck () {
     echo "Warning!"
     echo "wget not found."
     echo "Please see http://www.gnu.org/s/wget/"
-    echo "ABM can continue, however you may experiance problems."
+    echo "ABM can continue, however you may experience problems."
     read -p "Press [ENTER] key to continue..."
   fi
   if [[ -z `which zip` ]]; then
     echo "Warning!"
     echo "zip not found."
     echo "Please see http://www.info-zip.org/"
-    echo "ABM can continue, however you may experiance problems."
+    echo "ABM can continue, however you may experience problems."
     read -p "Press [ENTER] key to continue..."
   fi
   if [[ -z `which logrotate` ]]; then
     echo "Warning!"
     echo "logrotate not found."
     echo "Please see https://fedorahosted.org/logrotate/"
-    echo "ABM can continue, however you may experiance problems."
+    echo "ABM can continue, however you may experience problems."
     read -p "Press [ENTER] key to continue..."
   fi
   if [[ -z `which md5sum` ]]; then
     echo "Warning!"
     echo "md5sum not found."
     echo "Please see http://www.gnu.org/software/coreutils/"
-    echo "ABM can continue, however you may experiance problems."
+    echo "ABM can continue, however you may experience problems."
     read -p "Press [ENTER] key to continue..."
   fi
   if [[ -z `which python` ]]; then
     echo "Warning!"
     echo "Python not found."
-    echo "ABM can continue, however you may not have the best experiance."
+    echo "ABM can continue, however you may not have the best experience."
     read -p "Press [ENTER] key to continue..."
   fi
   if [[ `which python` ]]; then
