@@ -805,7 +805,7 @@ showInfo () {
   echo -e $txtbld"Ascii Bukkit Menu: "$txtrst$abmversion$txtbld "Session ID: "$txtrst$abmid
   if [[ -n "$latestabm" ]]; then
     if [[ "$latestabm" > "$abmversion" ]]; then
-      echo -e $txtred"Update Availible:" $latestabm $txtrst
+      echo -e $txtred"Update Available:" $latestabm $txtrst
     fi
   fi
   echo -e $txtbld"Sessions Active: "$txtrst$abmAttached$txtbld" Inactive: "$txtrst$abmDetached
